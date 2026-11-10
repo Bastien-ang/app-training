@@ -15,10 +15,23 @@
   {k:'rn-tempo',t:'Tempo 20 min',s:'Tempo',min:45,diff:'noire',n:'Séance exigeante : à éviter la veille de ta sortie moto.'},
   {k:'cd-run',t:'Fractionné 8 × 400 m',s:'Fractionné',min:40,diff:'noire',n:'Séance exigeante : à éviter la veille de ta sortie moto.'},
   {k:'rn-fart',t:'Fartlek 30 min',s:'Fartlek',min:40,diff:'bleue',n:'Variations d\'allure ludiques.'}];
+ def('hx-run1k',{name:'Course 1 km',kind:'station',tb:300});PAT_DEFAULT['hx-run1k']='run';
+ const HX=[
+  {k:'hx-sim',t:'Hyrox — Simulation complète',s:'Hyrox complet',min:100,diff:'noire',n:'8 × (1 km de course + 1 station), dans l\'ordre de la course. Séance très dure : au maximum une fois par mois, jamais la veille de la moto.',
+   b:[['SkiErg 1000 m','mer-skierg'],['Sled push','mer-sledpush'],['Sled pull','mer-sledpull'],['Burpees broad jump','mer-burpee'],['Rameur 1000 m','mer-row'],['Farmer carry','mer-farmer'],['Sandbag lunges','mer-lunges'],['Wall balls','mer-wb']].map((x,i)=>({n:(i+1)+'. Course 1 km + '+x[0],ex:['hx-run1k~'+(i+1),x[1]]}))},
+  {k:'hx-half',t:'Hyrox — Demi-simulation (4 stations)',s:'Hyrox demi',min:60,diff:'noire',n:'4 × (1 km + station), allure de course. Bon test sans exploser les jambes.',
+   b:[['SkiErg 1000 m','mer-skierg'],['Sled push','mer-sledpush'],['Burpees broad jump','mer-burpee'],['Wall balls','mer-wb']].map((x,i)=>({n:(i+1)+'. Course 1 km + '+x[0],ex:['hx-run1k~'+(i+1),x[1]]}))},
+  {k:'hx-comp',t:'Hyrox — Course sous fatigue',s:'Course fatigue',min:55,diff:'noire',n:'Station puis 1 km sans repos : apprend à courir jambes lourdes. Garde une allure régulière.',
+   b:[['Burpees broad jump','mer-burpee'],['Wall balls','mer-wb'],['Sandbag lunges','mer-lunges'],['Sled push','mer-sledpush']].map((x,i)=>({n:(i+1)+'. '+x[0]+' puis 1 km',ex:[x[1],'hx-run1k~'+(i+1)]}))},
+  {k:'hx-circ',t:'Hyrox — Circuit stations',s:'Circuit Hyrox',min:45,diff:'bleue',n:'3 tours enchaînés : sled push, farmer carry, wall balls, burpees. Repos 2 min entre les tours.',b:[{n:'Circuit · 3 tours',ex:['cd-circuit']}]},
+  {k:'hx-force',t:'Hyrox — Force spécifique',s:'Force Hyrox',min:55,diff:'bleue',n:'Charges lourdes, séries courtes, repos complet entre les stations.',b:[{n:'Stations lourdes',ex:['mer-sledpush','mer-sledpull','mer-farmer','mer-lunges','mer-wb']}]},
+  {k:'hx-erg',t:'Hyrox — Machines cardio',s:'SkiErg + rameur',min:40,diff:'bleue',n:'Cardio machines pour le moteur : SkiErg et rameur, sans pause.',b:[{n:'Machines · 5 tours',ex:['cd-erg']},{n:'Stations seules',ex:['mer-skierg','mer-row']}]}];
  const DAYS=['lun','mar','mer','jeu','ven','sam','dim'];
  function tpl(k){
   const P2=PROG2[k];
   if(P2)return{soir:P2.soir,short:P2.short,diff:P2.diff,title:P2.title,note:P2.note,rest:P2.rest,suggest:P2.suggest,optional:P2.optional,run:P2.run,load:P2.load};
+  const hx=HX.find(x=>x.k===k);
+  if(hx)return{soir:{title:hx.t,short:hx.s,dur:hx.min+' min',min:hx.min,A:hx.b,note:hx.n},short:hx.s,diff:hx.diff,title:undefined,note:undefined,rest:undefined,suggest:undefined,optional:undefined,run:undefined,load:undefined};
   const r=RT.find(x=>x.k===k);
   if(r)return{soir:{title:r.t,short:r.s,dur:r.min+' min',min:r.min,A:[{n:r.t,ex:[r.k]}],note:r.n},short:r.s,diff:r.diff,title:undefined,note:undefined,rest:undefined,suggest:undefined,optional:undefined,run:undefined,load:undefined};
   return null;}
@@ -36,6 +49,7 @@
   h+=sec('Musculation (ton programme)');
   ['lun','mar','mer','jeu'].forEach(k=>{const P2=PROG2[k];if(P2&&P2.soir)h+=btn(k,P2.soir.title,P2.label);});
   h+=sec('Course');RT.forEach(r=>h+=btn(r.k,r.t,r.min+' min'));
+  h+=sec('Hyrox');HX.forEach(r=>h+=btn(r.k,r.t,r.min+' min'));
   h+=sec('Autre');h+=btn('dim','Repos complet','');h+=btn('sam','Motocross / sortie libre','');h+=btn('ven','Jour libre (VTT, moto…)','');
   h+=sec('Échanger avec un autre jour de la semaine');
   for(let i=0;i<7;i++){const x=addDays(mondayOf(d),i);if(x===d)continue;const Px=progOf(x);h+=btn('__x'+x,'↔ '+Px.label+' : '+(Px.soir?Px.soir.title:(Px.title||Px.short)),'');}

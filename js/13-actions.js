@@ -1,7 +1,7 @@
 /* ===================== ACTIONS, MINUTEUR, COACH, DÉMARRAGE ===================== */
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.className='on';clearTimeout(toast.h);toast.h=setTimeout(()=>t.className='',2600);}
 const NAV=[['home','Accueil','home'],['day','Séance','dumbbell'],['cal','Calendrier','cal'],['stats','Suivi','chart'],['set','Réglages','gear']];
-function renderNav(){document.getElementById('nav').innerHTML='<div class="brand">'+ic('mountain',18)+'HYBRID</div>'+NAV.map(n=>'<button class="nb'+(R.v===n[0]?' on':'')+'" data-a="'+(n[0]==='day'?'openDay':'nav')+'" data-v="'+n[0]+'" data-d="'+today()+'">'+ic(n[2],22)+'<span>'+n[1]+'</span></button>').join('');}
+function renderNav(){document.getElementById('nav').innerHTML='<div class="brand">'+ic('dumbbell',18)+'TRAINING</div>'+NAV.map(n=>'<button class="nb'+(R.v===n[0]?' on':'')+'" data-a="'+(n[0]==='day'?'openDay':'nav')+'" data-v="'+n[0]+'" data-d="'+today()+'">'+ic(n[2],22)+'<span>'+n[1]+'</span></button>').join('');}
 function render(keep){const y=window.scrollY;const v=document.getElementById('view');try{v.innerHTML=VIEWS[R.v]();}catch(e){v.innerHTML='<div class="fatal">Erreur d\'affichage : '+esc(e.message)+'</div>';console.error(e);}renderNav();window.scrollTo(0,keep?y:0);startFigs();}
 function go(v,o){R.v=v;Object.assign(R,o||{});render(false);}
 function itFor(d,id){const e=getEx(d,id);return resolve(id,e&&e.k?e.k.split('::')[1]:undefined);}
