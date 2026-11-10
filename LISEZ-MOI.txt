@@ -1,0 +1,11 @@
+PROGRAMME D'ENTRAINEMENT — application installable
+
+1) Depuis ton ordinateur, va sur https://app.netlify.com/drop et glisse le DOSSIER « programme-entrainement-app » (ou le .zip).
+   Tu obtiens un lien du type https://xxxx.netlify.app (garde-le).
+2) iPhone : ouvre le lien dans Safari > Partager > « Sur l'écran d'accueil ».
+   Android : Chrome > menu > « Installer l'application ».
+   Ordinateur : Chrome ou Edge > icône « Installer » dans la barre d'adresse (ou menu > Installer).
+3) Ouvre ensuite l'appli depuis son icône. Elle fonctionne aussi sans connexion.
+
+Important : les données restent sur chaque appareil (téléphone et ordinateur ne se synchronisent pas).
+Utilise Réglages > Sauvegarde > Copier / Importer pour passer tes données d'un appareil à l'autre.
