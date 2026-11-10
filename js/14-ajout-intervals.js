@@ -53,7 +53,7 @@
   return '• '+it.name+(it.txt?' — '+it.txt:'');}
  function icuDesc(d,SO){const out=[];SO.blocks.forEach(b=>{out.push(b.n);ssGroups(d,b.ex).forEach(g=>{if(g.length>1)out.push('⛓ '+ssLabel(g.length)+' : '+g.map(x=>itFor(d,x).name).join(' + '));g.forEach(x=>out.push(lineFor(d,x)));});out.push('');});
   if(SO.note)out.push(SO.note);return out.join('\n').trim();}
- function icuEvents(n){const ev=[];for(let i=0;i<n;i++){const d=addDays(today(),i);let P,SO;try{P=progOf(d);SO=soirOf(P,d);}catch(e){continue;}if(!SO||!SO.blocks||!SO.blocks.length)continue;
+ function icuEvents(n){const ev=[];const ds=Array.isArray(n)?n:Array.from({length:n},(_,i)=>addDays(today(),i));for(const d of ds){let P,SO;try{P=progOf(d);SO=soirOf(P,d);}catch(e){continue;}if(!SO||!SO.blocks||!SO.blocks.length)continue;
    const ids=SO.blocks.flatMap(b=>b.ex),run=window.RN_STEPS&&ids.length&&ids.every(x=>window.RN_STEPS[x]);ev.push({category:'WORKOUT',type:run?'Run':'WeightTraining',start_date_local:d+'T18:30:00',name:SO.title,description:run?ids.map(x=>window.RN_STEPS[x]).join('\n'):icuDesc(d,SO),moving_time:(SO.min||60)*60,external_id:'hx-'+d});}
   return ev;}
  let busy=false;
@@ -71,19 +71,29 @@
  Object.assign(A,{
   icuSave:()=>{const id=(document.getElementById('icuid').value||'').trim(),k=(document.getElementById('icukey').value||'').trim();const o={id:id};if(k&&!/^•+$/.test(k))o.key=k;setCfg(o);toast('Enregistré sur cet appareil');render(true);},
   icuAuto:()=>{setCfg({auto:!cfg().auto});render(true);},
-  icuSend:()=>{icuPush(10,false);},
+  icuSend:()=>{icuPush(cfg().range===1?1:10,false);},
   icuDel:()=>{try{localStorage.removeItem(CK);}catch(e){}render(true);toast('Clé effacée');},
   icuCopy:()=>{const d=today(),SO=soirOf(progOf(d),d);if(!SO){toast('Pas de séance aujourd\'hui');return;}const t=SO.title+'\n\n'+icuDesc(d,SO);
    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast('Séance copiée — colle-la dans Intervals.icu')).catch(()=>toast('Copie impossible'));else toast('Copie impossible');}});
+
+ Object.assign(A,{
+  icuRange:d=>{setCfg({range:+d.n,hash:''});render(true);},
+  icuDay:async d=>{const c=cfg();if(!c.key){toast('Renseigne ta clé API dans Réglages');return;}const ev=icuEvents([d.d]);if(!ev.length){toast('Aucune séance ce jour-là');return;}
+   try{const r=await fetch('https://intervals.icu/api/v1/athlete/'+encodeURIComponent(c.id||'0')+'/events/bulk?upsert=true',{method:'POST',headers:{'Authorization':'Basic '+btoa('API_KEY:'+c.key),'Content-Type':'application/json'},body:JSON.stringify(ev)});
+    if(!r.ok)throw new Error(r.status===401||r.status===403?'clé ou ID refusé':'erreur '+r.status);toast('Séance envoyée sur ta montre ⌚ (via Intervals.icu)');}catch(e){toast('Intervals.icu : '+(e.message==='Failed to fetch'?'connexion bloquée':e.message));}},
+  icuRm:async d=>{const c=cfg();if(!c.key){toast('Renseigne ta clé API dans Réglages');return;}
+   try{const r=await fetch('https://intervals.icu/api/v1/athlete/'+encodeURIComponent(c.id||'0')+'/events/bulk-delete',{method:'PUT',headers:{'Authorization':'Basic '+btoa('API_KEY:'+c.key),'Content-Type':'application/json'},body:JSON.stringify([{external_id:'hx-'+d.d}])});
+    if(!r.ok)throw new Error('erreur '+r.status);setCfg({hash:''});toast('Séance retirée d\'Intervals.icu');}catch(e){toast('Intervals.icu : '+(e.message==='Failed to fetch'?'connexion bloquée':e.message));}}});
  const _vs=VIEWS.set;
  VIEWS.set=function(){let h=_vs();const c=cfg();
   const card='<div class="card"><h3 class="d">Garmin via Intervals.icu</h3><div class="sub" style="margin-bottom:8px">Envoie tes séances à venir (10 jours) dans le calendrier Intervals.icu, qui les pousse sur ta montre Garmin si la synchro Garmin est activée dans Intervals.icu (Settings ▸ Garmin). Clé : Intervals.icu ▸ Settings ▸ Developer Settings ▸ API key. Elle reste uniquement sur cet appareil.</div>'
    +'<div class="row" style="gap:6px;margin-bottom:6px"><input class="inp" id="icuid" placeholder="ID athlète (ex : i123456) — facultatif" value="'+esc(c.id||'')+'"></div>'
    +'<div class="row" style="gap:6px;margin-bottom:8px"><input class="inp" id="icukey" type="password" placeholder="Clé API" value="'+(c.key?'••••••••••':'')+'"><button class="btn sm" data-a="icuSave">OK</button>'+(c.key?'<button class="btn ghost sm" data-a="icuDel">Effacer</button>':'')+'</div>'
+   +'<div class="sub" style="margin-bottom:4px">Quoi envoyer :</div><div class="row wrap" style="gap:6px;margin-bottom:8px"><button class="chip'+(c.range===1?' on':'')+'" data-a="icuRange" data-n="1">Aujourd\'hui seulement</button><button class="chip'+(c.range!==1?' on':'')+'" data-a="icuRange" data-n="10">10 prochains jours</button></div>'
    +'<div class="row wrap" style="gap:6px"><button class="chip'+(c.auto?' on':'')+'" data-a="icuAuto">Envoi automatique</button><button class="btn sm" data-a="icuSend">Envoyer maintenant</button><button class="btn ghost sm" data-a="icuCopy">Copier la séance du jour</button></div>'
    +'<div class="sub" id="icust" style="margin-top:8px">'+(c.last?'Dernier envoi : '+esc(new Date(c.last).toLocaleString('fr-FR')):'Jamais envoyé')+'</div></div>';
   const k='<div class="card"><h3 class="d">Sauvegarde</h3>';return h.includes(k)?h.replace(k,card+k):h+card;};
  /* envoi auto : à l'ouverture et après modification de la séance */
- let tm=null;const _sv=save;save=function(){const r=_sv.apply(this,arguments);try{if(cfg().auto&&cfg().key){clearTimeout(tm);tm=setTimeout(()=>icuPush(10,true),20000);}}catch(e){}return r;};
- setTimeout(()=>{try{if(cfg().auto&&cfg().key)icuPush(10,true);}catch(e){}},4000);
+ let tm=null;const _sv=save;save=function(){const r=_sv.apply(this,arguments);try{if(cfg().auto&&cfg().key){clearTimeout(tm);tm=setTimeout(()=>icuPush(cfg().range===1?1:10,true),20000);}}catch(e){}return r;};
+ setTimeout(()=>{try{if(cfg().auto&&cfg().key)icuPush(cfg().range===1?1:10,true);}catch(e){}},4000);
 })();

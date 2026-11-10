@@ -62,7 +62,7 @@
  Object.assign(A,{swapday:d=>openSw(d.d)});
  const _vd=VIEWS.day;
  VIEWS.day=function(){let h=_vd();const d=R.d;const sw=S.logs[d]&&S.logs[d].swap;
-  const bar='<div class="row wrap" style="gap:6px;margin:8px 0 0"><button class="btn ghost sm" data-a="swapday" data-d="'+d+'">🔁 Changer la séance</button>'+(sw?'<span class="sub">séance remplacée</span>':'')+'</div>';
+  const bar='<div class="row wrap" style="gap:6px;margin:8px 0 0"><button class="btn ghost sm" data-a="swapday" data-d="'+d+'">🔁 Changer la séance</button><button class="btn ghost sm" data-a="icuDay" data-d="'+d+'">⌚ Envoyer sur ma montre</button><button class="btn ghost sm" data-a="icuRm" data-d="'+d+'">✕ Retirer</button>'+(sw?'<span class="sub">séance remplacée</span>':'')+'</div>';
   const mk='<div class="row wrap" style="margin:12px 0"><span class="badge"';const i=h.indexOf(mk);return i<0?h+bar:h.slice(0,i)+bar+h.slice(i);};
  /* Intervals : séance de course = type Run avec étapes */
  const _ie=window.__icuEventsHook;
