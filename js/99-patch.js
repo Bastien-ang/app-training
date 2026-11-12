@@ -38,7 +38,7 @@
  const _pf=progOf;
  progOf=function(d,id){const P=_pf.apply(this,arguments);if(id||!P||d<V2)return P;const L=S.logs&&S.logs[d];const k=L&&L.swap;if(!k)return P;const T=tpl(k);return T?Object.assign({},P,T):P;};
  const effKey=d=>(S.logs[d]&&S.logs[d].swap)||dayId(d);
- const reset=L=>{L.ss=[];L.add=[];};
+ const reset=L=>{L.ss=[];L.add=[];L.del=[];};
  function setSwap(d,k){const L=S.logs[d]=S.logs[d]||{};if(k===dayId(d))delete L.swap;else L.swap=k;reset(L);}
  function closeSw(){const o=document.getElementById('swov');if(o)o.remove();}
  function openSw(d){closeSw();const o=document.createElement('div');o.id='swov';o.style.cssText='position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center';
@@ -60,9 +60,11 @@
    else setSwap(d,k);
    save();closeSw();render(true);toast('Séance modifiée ✓');});}
  Object.assign(A,{swapday:d=>openSw(d.d)});
+ window.hxSwap=function(d,k){if(!tpl(k))return false;setSwap(d,k);save();render(true);return true;};
+ window.hxKeys=function(){return ['lun','mar','mer','jeu'].concat(RT.map(x=>x.k),HX.map(x=>x.k)).join(', ');};
  const _vd=VIEWS.day;
- VIEWS.day=function(){let h=_vd();const d=R.d;const sw=S.logs[d]&&S.logs[d].swap;
-  const bar='<div class="row wrap" style="gap:6px;margin:8px 0 0"><button class="btn ghost sm" data-a="swapday" data-d="'+d+'">🔁 Changer la séance</button><button class="btn ghost sm" data-a="icuDay" data-d="'+d+'">⌚ Envoyer sur ma montre</button><button class="btn ghost sm" data-a="icuRm" data-d="'+d+'">✕ Retirer</button>'+(sw?'<span class="sub">séance remplacée</span>':'')+'</div>';
+ VIEWS.day=function(){let h=_vd();const d=R.d;const sw=S.logs[d]&&S.logs[d].swap;const ndel=((S.logs[d]&&S.logs[d].del)||[]).length;
+  const bar='<div class="row wrap" style="gap:6px;margin:8px 0 0"><button class="btn ghost sm" data-a="swapday" data-d="'+d+'">🔁 Changer la séance</button><button class="btn ghost sm" data-a="icuDay" data-d="'+d+'">⌚ Envoyer sur ma montre</button><button class="btn ghost sm" data-a="icuRm" data-d="'+d+'">✕ Retirer de la montre</button>'+(sw?'<span class="sub">séance remplacée</span>':'')+(ndel?'<button class="btn ghost sm" data-a="exrestore" data-d="'+d+'">↩ Remettre les exos retirés ('+ndel+')</button>':'')+'</div>';
   const mk='<div class="row wrap" style="margin:12px 0"><span class="badge"';const i=h.indexOf(mk);return i<0?h+bar:h.slice(0,i)+bar+h.slice(i);};
  /* Intervals : séance de course = type Run avec étapes */
  const _ie=window.__icuEventsHook;

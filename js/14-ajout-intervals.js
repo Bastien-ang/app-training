@@ -8,15 +8,15 @@
  const addList=d=>((S.logs[d]&&S.logs[d].add)||[]);
  const isAdded=(d,id)=>addList(d).some(a=>a.id===id);
  const _so=soirOf;
- soirOf=function(P,d){const r=_so(P,d);if(!r)return r;const ad=addList(d);if(!ad.length)return r;
+ soirOf=function(P,d){const r=_so(P,d);if(!r)return r;const ad=addList(d),dl=(S.logs[d]&&S.logs[d].del)||[];if(!ad.length&&!dl.length)return r;
   const blocks=r.blocks.map(b=>({n:b.n,ex:b.ex.slice()}));
   ad.forEach(a=>{if(!EX[a.id]||blocks.some(b=>b.ex.includes(a.id)))return;let bi=blocks.findIndex(b=>b.ex.includes(a.after));if(bi<0){bi=blocks.length-1;for(let i=blocks.length-1;i>=0;i--){if(!blocks[i].ex.every(x=>/^cz-/.test(x))){bi=i;break;}}}const b=blocks[bi],p=b.ex.indexOf(a.after);b.ex.splice(p<0?b.ex.length:p+1,0,a.id);});
-  return Object.assign({},r,{blocks});};
+  if(dl.length){const nb=blocks.map(b=>({n:b.n,ex:b.ex.filter(x=>!dl.includes(x))})).filter(b=>b.ex.length);if(nb.length)return Object.assign({},r,{blocks:nb});}return Object.assign({},r,{blocks});};
  /* bouton sous chaque exercice */
  const _ec=exCard;
  exCard=function(id,d){let h=_ec(id,d);let ok=false;try{ok=!!soirOf(progOf(d),d);}catch(e){}
   if(!ok)return h;
-  return h+'<div class="row wrap" style="gap:6px;margin:-2px 0 10px"><button class="btn ghost sm" data-a="addex" data-d="'+d+'" data-id="'+id+'">＋ Ajouter un exo après</button>'+(isAdded(d,id)?'<button class="btn ghost sm" style="color:var(--ember)" data-a="addrm" data-d="'+d+'" data-id="'+id+'">✕ Retirer cet exo</button>':'')+'</div>';};
+  return h+'<div class="row wrap" style="gap:6px;margin:-2px 0 10px"><button class="btn ghost sm" data-a="addex" data-d="'+d+'" data-id="'+id+'">＋ Ajouter un exo après</button>'+'<button class="btn ghost sm" style="color:var(--ember)" data-a="'+(isAdded(d,id)?'addrm':'exdel')+'" data-d="'+d+'" data-id="'+id+'">✕ Retirer cet exo</button></div>';};
  /* sélecteur */
  function pickList(){const out=[];Object.keys(PAT_DEFAULT).forEach(id=>{const e=EX[id];if(!e||/^cz-/.test(id))return;if(e.kind&&e.kind!=='lift'&&e.kind!=='time')return;out.push({id:id,name:e.name,m:e.m||'Autre'});});
   const seen={};return out.filter(x=>{const k=x.name+'|'+x.m;if(seen[k])return false;seen[k]=1;return true;});}
@@ -30,7 +30,7 @@
    o.querySelector('#pkl').innerHTML=all.filter(x=>(mf==='Tous'||x.m===mf)&&(!q||(x.name+' '+x.m).toLowerCase().includes(q))).map(x=>'<button class="btn ghost" style="text-align:left;justify-content:flex-start" data-id="'+x.id+'">'+esc(x.name)+' <span class="sub" style="margin-left:6px">'+esc(x.m)+'</span></button>').join('')||'<div class="sub">Aucun résultat</div>';};
   draw();o.addEventListener('click',e=>{if(e.target===o||e.target.id==='pkx'){closePick();return;}const m=e.target.closest('[data-m]');if(m){mf=m.dataset.m;draw();return;}const b=e.target.closest('#pkl [data-id]');if(b)doAdd(d,after,b.dataset.id,o.querySelector('#pkss').checked);});
   o.querySelector('#pkq').addEventListener('input',draw);}
- function doAdd(d,after,base,ss){const L=S.logs[d]=S.logs[d]||{};L.add=L.add||[];
+ function doAdd(d,after,base,ss){const L=S.logs[d]=S.logs[d]||{};L.add=L.add||[];if(L.del)L.del=L.del.filter(x=>x!==base);
   const SO=soirOf(progOf(d),d);const inSess=SO&&SO.blocks.some(b=>b.ex.includes(base));
   const id=inSess?base+'~'+Date.now().toString(36):base;
   L.add.push({id:id,after:after,ss:!!ss});
@@ -84,6 +84,15 @@
   icuRm:async d=>{const c=cfg();if(!c.key){toast('Renseigne ta clé API dans Réglages');return;}
    try{const r=await fetch('https://intervals.icu/api/v1/athlete/'+encodeURIComponent(c.id||'0')+'/events/bulk-delete',{method:'PUT',headers:{'Authorization':'Basic '+btoa('API_KEY:'+c.key),'Content-Type':'application/json'},body:JSON.stringify([{external_id:'hx-'+d.d}])});
     if(!r.ok)throw new Error('erreur '+r.status);setCfg({hash:''});toast('Séance retirée d\'Intervals.icu');}catch(e){toast('Intervals.icu : '+(e.message==='Failed to fetch'?'connexion bloquée':e.message));}}});
+
+ Object.assign(A,{
+  exdel:d=>{const L=S.logs[d.d]=S.logs[d.d]||{};let order=[];try{order=soirOf(progOf(d.d),d.d).blocks.flatMap(b=>b.ex);}catch(e){}
+   const p=order[order.indexOf(d.id)-1];L.del=L.del||[];if(!L.del.includes(d.id))L.del.push(d.id);
+   if(L.ss){L.ss=L.ss.filter(x=>x!==d.id);if(p)L.ss=L.ss.filter(x=>x!==p);}
+   save();render(true);toast('Exercice retiré (bouton « Remettre » en haut pour annuler)');},
+  exrestore:d=>{const L=S.logs[d.d];if(L){L.del=[];save();render(true);toast('Exercices remis');}}});
+ window.hxAdd=function(d,after,id,ss){if(!EX[id])return false;const SO=soirOf(progOf(d),d);if(!SO)return false;doAdd(d,after&&EX[after]?after:null,id,ss);return true;};
+ window.hxDel=function(d,id){if(!EX[id])return false;if(isAdded(d,id))A.addrm({d:d,id:id});else A.exdel({d:d,id:id});return true;};
  const _vs=VIEWS.set;
  VIEWS.set=function(){let h=_vs();const c=cfg();
   const card='<div class="card"><h3 class="d">Garmin via Intervals.icu</h3><div class="sub" style="margin-bottom:8px">Envoie tes séances à venir (10 jours) dans le calendrier Intervals.icu, qui les pousse sur ta montre Garmin si la synchro Garmin est activée dans Intervals.icu (Settings ▸ Garmin). Clé : Intervals.icu ▸ Settings ▸ Developer Settings ▸ API key. Elle reste uniquement sur cet appareil.</div>'
