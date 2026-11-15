@@ -125,7 +125,7 @@ VIEWS.day=function(){
 VIEWS.home=function(){
  const t=today(),id=dayId(t),P=progOf(t),SO0=soirOf(P,t),mon=mondayOf(t),wc=weekCounts(mon);
  const title=SO0?SO0.title:P.title;const sub=[];if(SO0)sub.push(SO0.dur+(SO0.variant?' · variante '+SO0.variant:''));
- let h='<div class="card"><div class="mono-s">'+longDate(t)+'</div><div class="d" style="font-size:1.5rem;margin:2px 0 0">Salut Bastien</div></div>';
+ let h='<div class="card"><div class="mono-s">'+longDate(t)+'</div><div class="d" style="font-size:1.5rem;margin:2px 0 0">Salut '+esc(window.hxName?window.hxName():'Bastien')+'</div></div>';
  h+='<button class="hero" style="--acc:'+DIFF[P.diff].c+'" data-a="openDay" data-d="'+t+'"><span class="ic">'+ic(P.rest?'heart':(id==='sam'?'flag':'play'),22)+'</span><span class="grow"><span class="mono-s" style="display:block">Séance du jour'+(dayDone(t)?' · ✓ faite':'')+'</span><span class="t">'+esc(title)+'</span><span class="sub" style="display:block;margin-top:2px">'+esc(sub.join(' · '))+'</span></span>'+ic('right',20)+'</button>';
  h+='<div class="g4"><div class="tile"><div class="v">'+wc.done+'<small>/'+wc.planned+'</small></div><div class="l">Séances cette sem.</div></div><div class="tile"><div class="v">'+totalLogged()+'</div><div class="l">Séances loguées</div></div><div class="tile"><div class="v">'+(weekVolume(mon).tonT/1000).toFixed(1)+'<small>t</small></div><div class="l">Tonnage sem.</div></div><div class="tile"><div class="v">'+Math.round(weekVolume(mon).nSets)+'</div><div class="l">Séries cette sem.</div></div></div>';
  h+='<div class="sec"><h2 class="d">Cette semaine</h2></div><div class="card">'+dayStrip(t)+'<div class="sub" style="margin-top:8px">+ '+wc.extra+' activité'+(wc.extra>1?'s':'')+' libre'+(wc.extra>1?'s':'')+'</div></div>';

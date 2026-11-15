@@ -27,7 +27,9 @@
   {k:'hx-force',t:'Hyrox — Force spécifique',s:'Force Hyrox',min:55,diff:'bleue',n:'Charges lourdes, séries courtes, repos complet entre les stations.',b:[{n:'Stations lourdes',ex:['mer-sledpush','mer-sledpull','mer-farmer','mer-lunges','mer-wb']}]},
   {k:'hx-erg',t:'Hyrox — Machines cardio',s:'SkiErg + rameur',min:40,diff:'bleue',n:'Cardio machines pour le moteur : SkiErg et rameur, sans pause.',b:[{n:'Machines · 5 tours',ex:['cd-erg']},{n:'Stations seules',ex:['mer-skierg','mer-row']}]}];
  const DAYS=['lun','mar','mer','jeu','ven','sam','dim'];
+ window.hxTplExt=window.hxTplExt||{};window.hxSwExt=window.hxSwExt||[];window.hxProfKey=window.hxProfKey||(()=>null);window.hxProfOn=window.hxProfOn||(()=>false);
  function tpl(k){
+  if(window.hxTplExt[k])return window.hxTplExt[k]();
   const P2=PROG2[k];
   if(P2)return{soir:P2.soir,short:P2.short,diff:P2.diff,title:P2.title,note:P2.note,rest:P2.rest,suggest:P2.suggest,optional:P2.optional,run:P2.run,load:P2.load};
   const hx=HX.find(x=>x.k===k);
@@ -36,10 +38,10 @@
   if(r)return{soir:{title:r.t,short:r.s,dur:r.min+' min',min:r.min,A:[{n:r.t,ex:[r.k]}],note:r.n},short:r.s,diff:r.diff,title:undefined,note:undefined,rest:undefined,suggest:undefined,optional:undefined,run:undefined,load:undefined};
   return null;}
  const _pf=progOf;
- progOf=function(d,id){const P=_pf.apply(this,arguments);if(id||!P||d<V2)return P;const L=S.logs&&S.logs[d];const k=L&&L.swap;if(!k)return P;const T=tpl(k);return T?Object.assign({},P,T):P;};
- const effKey=d=>(S.logs[d]&&S.logs[d].swap)||dayId(d);
- const reset=L=>{L.ss=[];L.add=[];L.del=[];};
- function setSwap(d,k){const L=S.logs[d]=S.logs[d]||{};if(k===dayId(d))delete L.swap;else L.swap=k;reset(L);}
+ progOf=function(d,id){const P=_pf.apply(this,arguments);if(id||!P||d<V2)return P;const L=S.logs&&S.logs[d];const k=(L&&L.swap)||window.hxProfKey(d);if(!k)return P;const T=tpl(k);const R=T?Object.assign({},P,T):P;return window.hxPost?window.hxPost(R,d):R;};
+ const effKey=d=>(S.logs[d]&&S.logs[d].swap)||window.hxProfKey(d)||dayId(d);
+ const reset=L=>{L.ss=[];L.add=[];L.del=[];delete L.lay;};
+ function setSwap(d,k){const L=S.logs[d]=S.logs[d]||{};if(k===(window.hxProfKey(d)||dayId(d)))delete L.swap;else L.swap=k;reset(L);}
  function closeSw(){const o=document.getElementById('swov');if(o)o.remove();}
  function openSw(d){closeSw();const o=document.createElement('div');o.id='swov';o.style.cssText='position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center';
   const btn=(k,t,sub)=>'<button class="btn ghost" style="text-align:left;justify-content:flex-start;flex-direction:column;align-items:flex-start;gap:2px" data-sw="'+k+'"><span>'+esc(t)+'</span>'+(sub?'<span class="sub">'+esc(sub)+'</span>':'')+'</button>';
@@ -50,18 +52,20 @@
   ['lun','mar','mer','jeu'].forEach(k=>{const P2=PROG2[k];if(P2&&P2.soir)h+=btn(k,P2.soir.title,P2.label);});
   h+=sec('Course');RT.forEach(r=>h+=btn(r.k,r.t,r.min+' min'));
   h+=sec('Hyrox');HX.forEach(r=>h+=btn(r.k,r.t,r.min+' min'));
-  h+=sec('Autre');h+=btn('dim','Repos complet','');h+=btn('sam','Motocross / sortie libre','');h+=btn('ven','Jour libre (VTT, moto…)','');
+  window.hxSwExt.forEach(g=>{h+=sec(g.sec);g.items.forEach(i=>{h+=btn(i.k,i.t,i.sub);});});
+  h+=sec('Autre');h+=btn('pf-rest','Repos complet','');if(!window.hxProfOn()){h+=btn('sam','Motocross / sortie libre','');h+=btn('ven','Jour libre (VTT, moto…)','');}
   h+=sec('Échanger avec un autre jour de la semaine');
   for(let i=0;i<7;i++){const x=addDays(mondayOf(d),i);if(x===d)continue;const Px=progOf(x);h+=btn('__x'+x,'↔ '+Px.label+' : '+(Px.soir?Px.soir.title:(Px.title||Px.short)),'');}
   h+='</div>';o.innerHTML=h;document.body.appendChild(o);
   o.addEventListener('click',e=>{if(e.target===o||e.target.id==='swx'){closeSw();return;}const b=e.target.closest('[data-sw]');if(!b)return;const k=b.dataset.sw;
-   if(k==='__reset')setSwap(d,dayId(d));
+   if(k==='__reset')setSwap(d,window.hxProfKey(d)||dayId(d));
    else if(k.indexOf('__x')===0){const x=k.slice(3),kd=effKey(d),kx=effKey(x);setSwap(d,kx);setSwap(x,kd);}
    else setSwap(d,k);
    save();closeSw();render(true);toast('Séance modifiée ✓');});}
  Object.assign(A,{swapday:d=>openSw(d.d)});
  window.hxSwap=function(d,k){if(!tpl(k))return false;setSwap(d,k);save();render(true);return true;};
- window.hxKeys=function(){return ['lun','mar','mer','jeu'].concat(RT.map(x=>x.k),HX.map(x=>x.k)).join(', ');};
+ window.hxKeys=function(){return ['lun','mar','mer','jeu'].concat(RT.map(x=>x.k),HX.map(x=>x.k),Object.keys(window.hxTplExt)).join(', ');};
+ window.hxTitle=function(k){const T=tpl(k);return T?(T.soir?T.soir.title:(T.title||k)):k;};
  const _vd=VIEWS.day;
  VIEWS.day=function(){let h=_vd();const d=R.d;const sw=S.logs[d]&&S.logs[d].swap;const ndel=((S.logs[d]&&S.logs[d].del)||[]).length;
   const bar='<div class="row wrap" style="gap:6px;margin:8px 0 0"><button class="btn ghost sm" data-a="swapday" data-d="'+d+'">🔁 Changer la séance</button><button class="btn ghost sm" data-a="icuDay" data-d="'+d+'">⌚ Envoyer sur ma montre</button><button class="btn ghost sm" data-a="icuRm" data-d="'+d+'">✕ Retirer de la montre</button>'+(sw?'<span class="sub">séance remplacée</span>':'')+(ndel?'<button class="btn ghost sm" data-a="exrestore" data-d="'+d+'">↩ Remettre les exos retirés ('+ndel+')</button>':'')+'</div>';

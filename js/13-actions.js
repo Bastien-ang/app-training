@@ -108,7 +108,7 @@ let SMP=null,DL=null;
 async function initCaps(){try{if(window.claude&&claude.use){SMP=await claude.use('sample');DL=await claude.use('downloads');}}catch(e){}}
 function renderChat(){const b=document.querySelector('#chat .cb');const key=localStorage.getItem(LS_APIKEY);
  let h='';if(!key&&!SMP)h+='<div class="msg a">Pour activer le coach, ajoute ta clé API Anthropic dans <b>Réglages → Coach IA</b>. Elle reste uniquement sur ton téléphone.</div>';
- else if(!chatMsgs.length)h+='<div class="msg a">Salut Bastien ! Je connais ton programme, ton volume et ta charge de la semaine. Demande-moi d\'adapter une séance, de changer un exercice, de caler ta date Hyrox ou de l\'analyser. 💪</div>';
+ else if(!chatMsgs.length)h+='<div class="msg a">Salut '+esc(window.hxName?window.hxName():'Bastien')+' ! Je connais ton programme, ton volume et ta charge de la semaine. Demande-moi d\'adapter une séance, de changer un exercice, de caler ta date Hyrox ou de l\'analyser. 💪</div>';
  chatMsgs.forEach(m=>{h+='<div class="msg '+(m.r==='user'?'u':'a')+'">'+esc(m.c)+'</div>';});b.innerHTML=h;b.scrollTop=b.scrollHeight;}
 function coachContext(){const t=today(),mon=mondayOf(t),v=weekVolume(mon);
  const week=['lun','mar','mer','jeu','ven','sam','dim'].map((id,i)=>{const dd=addDays(mon,i),P=progOf(dd,id),SO=soirOf(P,dd);return id+': '+(SO?SO.short:P.title);}).join(' | ');

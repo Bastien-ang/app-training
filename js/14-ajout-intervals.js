@@ -12,11 +12,25 @@
   const blocks=r.blocks.map(b=>({n:b.n,ex:b.ex.slice()}));
   ad.forEach(a=>{if(!EX[a.id]||blocks.some(b=>b.ex.includes(a.id)))return;let bi=blocks.findIndex(b=>b.ex.includes(a.after));if(bi<0){bi=blocks.length-1;for(let i=blocks.length-1;i>=0;i--){if(!blocks[i].ex.every(x=>/^cz-/.test(x))){bi=i;break;}}}const b=blocks[bi],p=b.ex.indexOf(a.after);b.ex.splice(p<0?b.ex.length:p+1,0,a.id);});
   if(dl.length){const nb=blocks.map(b=>({n:b.n,ex:b.ex.filter(x=>!dl.includes(x))})).filter(b=>b.ex.length);if(nb.length)return Object.assign({},r,{blocks:nb});}return Object.assign({},r,{blocks});};
+ /* ordre personnalisé : S.logs[d].lay = {nom du bloc:[ids]} */
+ const _so2=soirOf;
+ soirOf=function(P,d){const r=_so2(P,d);const L=S.logs[d];if(!r||!r.blocks||!L||!L.lay)return r;
+  const have=new Set();r.blocks.forEach(b=>b.ex.forEach(x=>have.add(x)));const used=new Set();
+  const nb=r.blocks.map(b=>{const ex=(L.lay[b.n]||[]).filter(x=>have.has(x)&&!used.has(x));ex.forEach(x=>used.add(x));return{n:b.n,ex:ex};});
+  r.blocks.forEach((b,i)=>{b.ex.forEach((x,j)=>{if(used.has(x))return;used.add(x);const t=nb[i],prev=b.ex[j-1],p=prev?t.ex.indexOf(prev):-1;t.ex.splice(p<0?(j===0?0:t.ex.length):p+1,0,x);});});
+  const out=nb.filter(b=>b.ex.length);return Object.assign({},r,{blocks:out.length?out:r.blocks});};
+ function moveEx(d,id,dir){const SO=soirOf(progOf(d),d);if(!SO)return;
+  const bl=SO.blocks.map(b=>({n:b.n,g:ssGroups(d,b.ex)}));let bi=-1,gi=-1;
+  bl.forEach((b,i)=>b.g.forEach((g,j)=>{if(g.includes(id)){bi=i;gi=j;}}));if(bi<0)return;const B=bl[bi];
+  if(dir<0){if(gi>0){const t=B.g[gi-1];B.g[gi-1]=B.g[gi];B.g[gi]=t;}else if(bi>0){bl[bi-1].g.push(B.g.splice(gi,1)[0]);}else return;}
+  else{if(gi<B.g.length-1){const t=B.g[gi+1];B.g[gi+1]=B.g[gi];B.g[gi]=t;}else if(bi<bl.length-1){bl[bi+1].g.unshift(B.g.splice(gi,1)[0]);}else return;}
+  const L=S.logs[d]=S.logs[d]||{};L.lay={};bl.forEach(b=>{L.lay[b.n]=[].concat.apply([],b.g);});save();render(true);}
  /* bouton sous chaque exercice */
  const _ec=exCard;
- exCard=function(id,d){let h=_ec(id,d);let ok=false;try{ok=!!soirOf(progOf(d),d);}catch(e){}
-  if(!ok)return h;
-  return h+'<div class="row wrap" style="gap:6px;margin:-2px 0 10px"><button class="btn ghost sm" data-a="addex" data-d="'+d+'" data-id="'+id+'">＋ Ajouter un exo après</button>'+'<button class="btn ghost sm" style="color:var(--ember)" data-a="'+(isAdded(d,id)?'addrm':'exdel')+'" data-d="'+d+'" data-id="'+id+'">✕ Retirer cet exo</button></div>';};
+ exCard=function(id,d){let h=_ec(id,d);let ok=false,flat=[];try{const SO=soirOf(progOf(d),d);ok=!!SO;if(SO)flat=[].concat.apply([],SO.blocks.map(b=>b.ex));}catch(e){}
+  if(!ok)return h;const ix=flat.indexOf(id);
+  const mv=(ix>0?'<button class="btn ghost sm" data-a="exup" data-d="'+d+'" data-id="'+id+'">↑ Monter</button>':'')+(ix>=0&&ix<flat.length-1?'<button class="btn ghost sm" data-a="exdown" data-d="'+d+'" data-id="'+id+'">↓ Descendre</button>':'');
+  return h+'<div class="row wrap" style="gap:6px;margin:-2px 0 10px">'+mv+'<button class="btn ghost sm" data-a="addex" data-d="'+d+'" data-id="'+id+'">＋ Ajouter un exo après</button>'+'<button class="btn ghost sm" style="color:var(--ember)" data-a="'+(isAdded(d,id)?'addrm':'exdel')+'" data-d="'+d+'" data-id="'+id+'">✕ Retirer cet exo</button></div>';};
  /* sélecteur */
  function pickList(){const out=[];Object.keys(PAT_DEFAULT).forEach(id=>{const e=EX[id];if(!e||/^cz-/.test(id))return;if(e.kind&&e.kind!=='lift'&&e.kind!=='time')return;out.push({id:id,name:e.name,m:e.m||'Autre'});});
   const seen={};return out.filter(x=>{const k=x.name+'|'+x.m;if(seen[k])return false;seen[k]=1;return true;});}
@@ -86,6 +100,7 @@
     if(!r.ok)throw new Error('erreur '+r.status);setCfg({hash:''});toast('Séance retirée d\'Intervals.icu');}catch(e){toast('Intervals.icu : '+(e.message==='Failed to fetch'?'connexion bloquée':e.message));}}});
 
  Object.assign(A,{
+  exup:d=>moveEx(d.d,d.id,-1),exdown:d=>moveEx(d.d,d.id,1),
   exdel:d=>{const L=S.logs[d.d]=S.logs[d.d]||{};let order=[];try{order=soirOf(progOf(d.d),d.d).blocks.flatMap(b=>b.ex);}catch(e){}
    const p=order[order.indexOf(d.id)-1];L.del=L.del||[];if(!L.del.includes(d.id))L.del.push(d.id);
    if(L.ss){L.ss=L.ss.filter(x=>x!==d.id);if(p)L.ss=L.ss.filter(x=>x!==p);}
