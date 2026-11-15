@@ -35,7 +35,7 @@
    :lv==='avance'?['rn-easy45','gx-s-interv','rn-tempo','gx-s-mix','rn-fart','gx-s-legrun']
    :['rn-easy45','gx-s-interv','rn-fart','gx-s-mix'];
   let hx;
-  if(p.partner)hx=lv==='debutant'||lowImpact?['gx-d-relay','gx-d-partner']:lv==='avance'?['gx-d-ygig','gx-d-relay','gx-d-partner','gx-d-ygig']:['gx-d-ygig','gx-d-relay','gx-d-partner'];
+  if(p.partner)hx=lv==='debutant'||lowImpact?['gx-d-relay','gx-d-emom','gx-d-partner','gx-d-metcon']:lv==='avance'?['gx-d-ygig','gx-d-wod','gx-d-hxhalf','gx-d-emom','gx-d-pyr','gx-d-chipper','gx-d-metcon']:['gx-d-ygig','gx-d-emom','gx-d-metcon','gx-d-relay','gx-d-wod','gx-d-partner'];
   else hx=lowImpact?['gx-s-engine','gx-s-interv','hx-erg']:lv==='debutant'?['hx-circ','hx-erg','gx-s-engine']:lv==='avance'?['gx-s-emom','gx-s-hybrid','gx-s-ladder','hx-force']:['gx-s-emom','hx-circ','gx-s-engine','gx-s-ladder'];
   return{cardio:cardio,hx:hx};}
  function muscleSeq(p,m){
@@ -62,7 +62,7 @@
   spread(C,1);spread(H,2);
   items.sort((a,b)=>a.pos-b.pos||a.pr-b.pr);
   /* évite deux séances très dures d'affilée : on échange avec le voisin plus léger quand c'est possible */
-  const hard=k=>/^gx-s-(emom|ladder|hybrid|legrun)|^gx-d-ygig|^gx-d-doubles|^hx-(sim|half|comp)|^rn-tempo|^mar$/.test(k);
+  const hard=k=>/^gx-s-(emom|ladder|hybrid|legrun)|^gx-d-(ygig|doubles|wod|chipper|pyr|hxhalf)|^hx-(sim|half|comp)|^rn-tempo|^mar$/.test(k);
   for(let i=1;i<items.length;i++){if(hard(items[i].k)&&hard(items[i-1].k)){for(let j=i+1;j<items.length;j++){if(!hard(items[j].k)){const t=items[i];items[i]=items[j];items[j]=t;break;}}}}
   days.forEach((d,i)=>{week[d]=items[i]?items[i].k:'pf-rest';});
   return week;}
