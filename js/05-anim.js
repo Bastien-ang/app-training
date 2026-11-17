@@ -18,7 +18,7 @@ function frontJ(p,pd){const dy=p.dy||0,N=[50,32+dy],P=[50,54+dy],H=[50,26+dy],SL
  let ER,WR,EL,WL;
  if(p.hx!==undefined){WR=[50+p.hx,p.hy];WL=[50-p.hx,p.hy];ER=ik2(SR,WR,12,11,(a,b)=>a[0]>b[0]);EL=ik2(SL,WL,12,11,(a,b)=>a[0]<b[0]);}
  else{ER=vadd(SR,[Math.sin(p.u*Math.PI/180)*12,Math.cos(p.u*Math.PI/180)*12]);WR=vadd(ER,[Math.sin(p.f*Math.PI/180)*11,Math.cos(p.f*Math.PI/180)*11]);EL=[100-ER[0],ER[1]];WL=[100-WR[0],WR[1]];}
- return{H:H,N:N,P:P,SL:SL,SR:SR,HL:HL,HR:HR,KL:KL,KR:KR,FL:FL,FR:FR,EL:EL,ER:ER,WL:WL,WR:WR,W:WR,F:FR,front:true};}
+ return{H:H,N:N,P:P,SL:SL,SR:SR,HL:HL,HR:HR,KL:KL,KR:KR,FL:FL,FR:FR,EL:EL,ER:ER,WL:WL,WR:WR,W:WR,F:FR,front:true,h:p.h};}
 function frontD(J){const f=v=>v[0].toFixed(1)+' '+v[1].toFixed(1);return'M'+f(J.SL)+'L'+f(J.SR)+'M'+f(J.N)+'L'+f(J.P)+'M'+f(J.HL)+'L'+f(J.KL)+'L'+f(J.FL)+'M'+f(J.HR)+'L'+f(J.KR)+'L'+f(J.FR)+'M'+f(J.SL)+'L'+f(J.EL)+'L'+f(J.WL)+'M'+f(J.SR)+'L'+f(J.ER)+'L'+f(J.WR);}
 
 /* cycle spécial : vélo, course */
@@ -89,18 +89,19 @@ const PAT_RULES=[[/tirage poulie haute|lat pulldown/i,'pulldown'],[/crunch machi
 const PAT_DEFAULT={'leg-squat':'squat','leg-rdl':'hinge','leg-press':'legpress','leg-curl':'legcurl','leg-ext':'legext','leg-calf':'calf','leg-bike':'bike','push-bench':'bench','push-incline':'incline','push-ohp':'shoulderpress','push-lateral':'lateral','push-dips':'dips','jr-pullup':'pullup','jr-dips':'dips','push-fly':'fly','push-tri':'pushdown','push-ski':'skierg','push-sled':'sledpush','pull-pullup':'pullup','pull-rowbar':'rowbent','pull-rowcable':'rowseated','pull-pulldown':'pulldown','pull-face':'facepull','pull-curlbar':'curl','pull-curlinc':'curl','pull-crunch':'crunch','pull-plank':'plank','pull-erg':'rower','pull-farmer':'carry','fri-chest':'chestpress','fri-lateral':'lateral','fri-pull':'pulldown','fri-tri':'pushdown','fri-curl':'curl','fri-bike':'bike','mer-skierg':'skierg','mer-sledpush':'sledpush','mer-sledpull':'sledpull','mer-burpee':'burpee','mer-row':'rower','mer-farmer':'carry','mer-lunges':'lunge','mer-wb':'wallball','leg-bike2':'bike'};
 function patFor(id,name){if(id==='push-ski'||id==='leg-bike'||id==='fri-bike'||id==='fin-bike'||id==='cd-z2'||id==='cd-run'||/^cz-/.test(id)){for(const r of PAT_RULES){if(r[0].test(name))return r[1];}}
  if(name!==EX[id].name)for(const r of PAT_RULES){if(r[0].test(name))return r[1];}return PAT_DEFAULT[id]||'squat';}
-function eqFor(pat,name){const pd=PATS[pat];let e=pd.eq;if(e==='none'||e==='sled'||e==='ball'||e==='hbar'||e==='db2'||e==='pads')return e;
+function eqFor(pat,name){const pd=PATS[pat];let e=pd.eq;if(e==='none'||e==='sled'||e==='ball'||e==='hbar'||e==='db2'||e==='pads'||e==='cross')return e;
  if(/haltère|kettlebell|gobelet|sac|sandbag/i.test(name)&&e!=='cable')return'db';if(/poulie|câble|corde|cable/i.test(name)&&pd.anchor)return'cable';if(/machine|presse|smith|hack|convergente|pec deck/i.test(name)&&e!=='cable'&&e!=='pad')return'handle';if(/barre|bar\b|trap|ez/i.test(name)&&e==='db')return'bar';return e;}
 
 /* rendu */
 function jointsAt(pd,t){if(pd.fn)return pd.fn(t);const ps=pd.poses,n=ps.length,u=t*n,i=Math.floor(u)%n,f=ease(u-Math.floor(u));
  const a=norm(ps[i],pd),b=norm(ps[(i+1)%n],pd);
- if(pd.fv){const A=Object.assign({u:0,f:0,dy:0},ps[i]),B=Object.assign({u:0,f:0,dy:0},ps[(i+1)%n]);const m={};['u','f','dy','hx','hy'].forEach(k=>{if(A[k]!==undefined&&B[k]!==undefined)m[k]=A[k]+(B[k]-A[k])*f;});return frontJ(m,pd);}
+ if(pd.fv){const A=Object.assign({u:0,f:0,dy:0},ps[i]),B=Object.assign({u:0,f:0,dy:0},ps[(i+1)%n]);const m={};['u','f','dy','hx','hy','h'].forEach(k=>{if(A[k]!==undefined&&B[k]!==undefined)m[k]=A[k]+(B[k]-A[k])*f;});return frontJ(m,pd);}
  return sideJ(mixp(a,b,f),pd);}
 function eqGeom(eq,J,pd){const c=[],p=[];const f=v=>v[0].toFixed(1)+' '+v[1].toFixed(1);const at=J[pd.at||'W']||J.W;
  if(eq==='bar')c.push([at[0],at[1],4.2]);else if(eq==='db')c.push([at[0],at[1],3.2]);else if(eq==='handle')c.push([at[0],at[1],2.6]);else if(eq==='ball')c.push([at[0],at[1],5.2]);
  else if(eq==='db2'){c.push([J.WL[0],J.WL[1],3.2]);c.push([J.WR[0],J.WR[1],3.2]);}
  else if(eq==='cable'){const an=pd.anchor||[94,30];p.push('M'+f(at)+'L'+f(an));c.push([at[0],at[1],2.4]);}
+ else if(eq==='cross'){const py=pd.py||38;p.push('M'+f(J.WL)+'L'+f([8,py]));p.push('M'+f(J.WR)+'L'+f([92,py]));c.push([J.WL[0],J.WL[1],2.6]);c.push([J.WR[0],J.WR[1],2.6]);}
  else if(eq==='pads'){p.push('M'+(J.WL[0]).toFixed(1)+' '+(J.WL[1]-8).toFixed(1)+'V'+(J.WL[1]+3).toFixed(1));p.push('M'+(J.WR[0]).toFixed(1)+' '+(J.WR[1]-8).toFixed(1)+'V'+(J.WR[1]+3).toFixed(1));}
  else if(eq==='hbar'){p.push('M'+f(J.WL)+'L'+f(J.WR));}
  else if(eq==='pad'){const F=J.F;p.push('M'+(F[0]-1).toFixed(1)+' '+(F[1]-6).toFixed(1)+'L'+(F[0]+3).toFixed(1)+' '+(F[1]+5).toFixed(1));}
@@ -122,7 +123,7 @@ function phCap(pat){const c=PHC[pat];const m=MUNAME[MU[pat]];return(m?'<b>'+m+'<
 const BODY=['lg2t','lg2s','lg2f','tor','lgt','lgs','lgf','nk','ua2','fa2','hd2','ua','fa','hd'];
 function figHTML(pat,name,cls){const pd=PATS[pat]||PATS.squat;const eq=eqFor(pat in PATS?pat:'squat',name||'');
  let rails='';if(/smith/i.test(name||'')&&!pd.fn&&pd.poses){const wx=jointsAt(pd,1e-9).W;if(wx){rails='<path class="dc" d="M'+(wx[0]-9).toFixed(1)+' 4V88M'+(wx[0]+9).toFixed(1)+' 4V88" stroke-dasharray="2 3"/>';}}
- return'<svg class="fig '+(cls||'')+'" viewBox="0 0 100 94" data-pat="'+pat+'" data-eq="'+eq+'" aria-hidden="true"><ellipse class="shd" cx="50" cy="88.5" rx="30" ry="2.4"/><path class="dc" d="M4 88H96"/>'+(pd.deco||'')+rails+'<path class="fg"/>'+BODY.map(k=>'<path class="b b-'+k+'"/>').join('')+'<circle class="fh" r="4.9"/><path class="hr"/><circle class="hm m1" r="5"/><circle class="hm m2" r="5"/><path class="fe e1"/><path class="fe e2"/><circle class="fe c1"/><circle class="fe c2"/></svg>';}
+ return'<svg class="fig '+(cls||'')+'" viewBox="0 0 100 94" data-pat="'+pat+'" data-eq="'+eq+'" aria-hidden="true"><ellipse class="shd" cx="50" cy="88.5" rx="30" ry="2.4"/><path class="dc" d="M4 88H96"/>'+(pd.deco||'')+(pd.deco2||'')+rails+'<path class="fg"/>'+BODY.map(k=>'<path class="b b-'+k+'"/>').join('')+'<circle class="fh" r="4.9"/><path class="hr"/><circle class="hm m1" r="5"/><circle class="hm m2" r="5"/><path class="fe e1"/><path class="fe e2"/><circle class="fe c1"/><circle class="fe c2"/></svg>';}
 function figFor(id,name,cls){return figHTML(patFor(id,name),name,cls);}
 function capd(a,b,w1,w2){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,r1=w1/2,r2=w2/2,f=n=>n.toFixed(1);
  const p1=[a[0]+nx*r1,a[1]+ny*r1],p2=[b[0]+nx*r2,b[1]+ny*r2],p3=[b[0]-nx*r2,b[1]-ny*r2],p4=[a[0]-nx*r1,a[1]-ny*r1];

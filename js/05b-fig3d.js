@@ -53,6 +53,8 @@
   eqp.pad=[0,1].map(()=>cyl(2.3,mat(PAD,{roughness:.9})));eqp.roll=cyl(2.4,mat(PAD,{roughness:.9}));
   eqp.sled=[0,1,2,3,4].map(i=>mesh(new T.BoxGeometry(1,1,1),i<1?dark():metal()));
   eqp.rail=[0,1].map(()=>cyl(.7,metal()));
+  /* colonnes à poulies : montant, crans de réglage, chariot (à la hauteur choisie), poulie, colonne de plaques */
+  eqp.tw=[0,1].map(()=>({col:cyl(2.1,mat(0x2b2f36,{metalness:.6,roughness:.4})),base:mesh(new T.BoxGeometry(1,1,1),dark()),stk:mesh(new T.BoxGeometry(1,1,1),dark()),car:mesh(new T.BoxGeometry(1,1,1),mat(ACC,{roughness:.45})),pul:cyl(3.1,mat(0xd5d9e0,{metalness:.7,roughness:.3})),tk:[0,1,2,3,4,5,6,7,8].map(()=>mesh(new T.BoxGeometry(1,1,1),mat(0x8a909a,{roughness:.5})))}));
  }
  function hideEq(){const h=o=>{if(Array.isArray(o))o.forEach(h);else if(o.isMesh)o.visible=false;else Object.values(o).forEach(h);};Object.values(eqp).forEach(h);}
  /* ---------- joints 2D -> 3D ---------- */
@@ -60,12 +62,12 @@
  function joints3(J,pd,pat){const o={S:{},E:{},W:{},H:{},K:{},F:{},T:{}};
   if(J.front){const lz=p=>p[0]-50,Y=p=>88-p[1];
    o.P=V(0,Y(J.P),0);o.N=V(0,Y(J.N),0);o.Hd=V(0,Y(J.H),0);
-   const hint=pat==='fly'?'hug':(pat==='pecdeck'||pat==='pecdeckrev')?'deck':(pat==='pulldown'||pat==='pullup')?'pull':'';
+   const hint=(pat==='fly'||/^cfly/.test(pat))?'hug':(pat==='pecdeck'||pat==='pecdeckrev')?'deck':(pat==='pulldown'||pat==='pullup')?'pull':'';
    [['R',J.SR,J.ER,J.WR,J.HR,J.KR,J.FR,1],['L',J.SL,J.EL,J.WL,J.HL,J.KL,J.FL,-1]].forEach(a=>{const s=a[0],sg=a[7];
     const S=V(0,Y(a[1])-.6,sg*9.0);o.S[s]=S;
     let ue=V(0,-(a[2][1]-a[1][1]),lz(a[2])-lz(a[1])),ew=V(0,-(a[3][1]-a[2][1]),lz(a[3])-lz(a[2]));
     if(hint==='deck'){const u=Math.atan2(Math.abs(ue.z),-ue.y)*180/Math.PI;const phi=Math.max(0,Math.min(1,(95-u)/73))*82*Math.PI/180;ue=V(Math.sin(phi)*12,-1.2,sg*Math.cos(phi)*12);ew=V(1.5,10.8,0);}
-    else if(hint==='hug'){const L=Math.abs(ue.z),u=Math.atan2(L,-ue.y)*180/Math.PI,phi=Math.max(0,Math.min(1,(100-u)/62))*75*Math.PI/180;const rot=v=>{const l=Math.abs(v.z);return V(l*Math.sin(phi)+2,v.y,sg*l*Math.cos(phi)*(v.z*sg<0?-1:1));};ue=rot(ue);ew=rot(ew);ew.x+=3;}
+    else if(hint==='hug'){const L=Math.abs(ue.z),u=Math.atan2(L,-ue.y)*180/Math.PI,phi=(J.h!==undefined?Math.max(0,Math.min(1,J.h)):Math.max(0,Math.min(1,(100-u)/62)))*(pd.hug||75)*Math.PI/180;const rot=v=>{const l=Math.abs(v.z);return V(l*Math.sin(phi)+2,v.y,sg*l*Math.cos(phi)*(v.z*sg<0?-1:1));};ue=rot(ue);ew=rot(ew);ew.x+=3;}
     else if(hint==='pull'){ue.x=1.5;ew.x=2.5;}
     else{ue.x=1.2;ew.x=2.4;}
     o.E[s]=S.clone().add(ue);o.W[s]=o.E[s].clone().add(ew);
@@ -113,6 +115,10 @@
  /* ---------- matériel ---------- */
  const ZAX=V(0,0,1);
  function seg(o,A,B){return bone(o,A,B,{base:1});}
+ function tower(i,x,z,HH,sg){const t=eqp.tw[i],bx=(o,cx,cy,cz,sx,sy,sz)=>{o.matrix.makeScale(sx,sy,sz);o.matrix.setPosition(cx,cy,cz);o.visible=true;};
+   seg(t.col,V(x,0,z),V(x,93,z));bx(t.base,x,.8,z,12,1.6,12);bx(t.stk,x+sg*9,34,z,6,62,9);
+   for(let k=0;k<9;k++)bx(t.tk[k],x-sg*2.1,6+10.2*k,z,1.2,.9,3.6);
+   bx(t.car,x-sg*1.2,HH,z,5.6,7,6.6);seg(t.pul,V(x-sg*3.8,HH-.7,z),V(x-sg*3.8,HH+.7,z));return V(x-sg*3.8,HH,z);}
  function equip(eq,j,J,pd,smith){hideEq();if(smith&&eq==='handle')eq='bar';if(!eq||eq==='none')return;
   const wm=mid(j.W.L,j.W.R),key=pd.at||'W';
   let c=key==='N'?j.N.clone().add(V(-3.4,.6,0)):key==='P'?j.P.clone().add(V(0,4.6,0)):key==='F'?mid(j.F.L,j.F.R):wm.clone();
@@ -126,8 +132,11 @@
     seg(d.h,h.clone().addScaledVector(ax,-3.6),h.clone().addScaledVector(ax,3.6));seg(d.a,h.clone().addScaledVector(ax,-3.9),h.clone().addScaledVector(ax,-2.0));seg(d.b,h.clone().addScaledVector(ax,2.0),h.clone().addScaledVector(ax,3.9));});}
   else if(eq==='handle'){['L','R'].forEach((s,i)=>{const fd=V().subVectors(j.W[s],j.E[s]).normalize(),h=j.W[s].clone().addScaledVector(fd,1.7);seg(eqp.grip[i],h.clone().add(V(0,0,-2.4)),h.clone().add(V(0,0,2.4)));});}
   else if(eq==='ball'){const b=wm.clone().add(V().subVectors(j.W.R,j.E.R).normalize().multiplyScalar(5));at(eqp.ball,b);eqp.ballr.matrix.makeRotationY(.5);eqp.ballr.matrix.setPosition(b);eqp.ballr.visible=true;}
+  else if(eq==='cross'){const HH=({hi:78,mid:50,lo:8})[pd.ph||'mid'];
+   ['L','R'].forEach((s,i)=>{const sg=s==='R'?1:-1,fd=V().subVectors(j.W[s],j.E[s]).normalize(),h=j.W[s].clone().addScaledVector(fd,1.7);
+    const P=tower(i,-4,sg*36,HH,-1);seg(eqp.cable[i],h,P);seg(eqp.grip[i],h.clone().add(V(0,0,-1.9)),h.clone().add(V(0,0,1.9)));});}
   else if(eq==='cable'){const an=pd.anchor||[94,30],A=V(an[0]-50,88-an[1],0),fd=V().subVectors(j.W.R,j.E.R).normalize(),h=wm.clone().addScaledVector(fd,1.7);
-   seg(eqp.cable[0],h,A);along(eqp.cbar,h,10.5);}
+   if(pd.ph){const P=tower(0,A.x-3.6,-2,A.y,A.x>0?1:-1);seg(eqp.cable[0],h,P);}else seg(eqp.cable[0],h,A);along(eqp.cbar,h,10.5);}
   else if(eq==='pads'){['L','R'].forEach((s,i)=>{const a=mid(j.E[s],j.W[s]);seg(eqp.pad[i],a.clone().add(V(1.6,-4.2,0)),a.clone().add(V(1.6,4.2,0)));});}
   else if(eq==='hbar'){const d=V().subVectors(j.W.R,j.W.L).normalize(),up=V(1.2,1.6,0);seg(eqp.bar,j.W.L.clone().add(up).addScaledVector(d,-6),j.W.R.clone().add(up).addScaledVector(d,6));
    if(pd.seat){const m=wm.clone().add(up);seg(eqp.cable[0],m,V(m.x,90,0));}}
@@ -249,12 +258,17 @@
   pose(j);setGlow(MU[pat],now/1000);const sm_=c.dataset.smith==='1';let eq_=c.dataset.eq;if(c.dataset.mk&&c.dataset.mk.indexOf('gen')!==0&&!sm_&&(eq_==='bar'||eq_==='db'))eq_='handle';equip(eq_,j,J,pd,sm_);
   const dg=decoFor(pat,pd);if(curDeco&&curDeco!==dg)curDeco.visible=false;dg.visible=true;curDeco=dg;
   const mc=machFor(pat,pd,c.dataset.mk);if(curMach&&curMach!==mc)curMach.grp.visible=false;if(mc){mc.grp.visible=true;mc.update(j);}curMach=mc;
-  const az=((pd.fv?64:30)+5*Math.sin(now/2600))*Math.PI/180,el=13*Math.PI/180,ft=fitFor(pat,pd,mc),D=216*ft.k,ty=ft.cy,tx=ft.cx;
+  const az=((pd.az||(pd.fv?64:30))+5*Math.sin(now/2600))*Math.PI/180,el=13*Math.PI/180,ft=fitFor(pat,pd,mc),D=216*ft.k,ty=ft.cy,tx=ft.cx;
   cam.position.set(tx+Math.sin(az)*Math.cos(el)*D,ty+Math.sin(el)*D,Math.cos(az)*Math.cos(el)*D);cam.lookAt(tx,ty,0);
-  R.render(scene,cam);const x=c._x||(c._x=c.getContext('2d'));x.clearRect(0,0,c.width,c.height);x.drawImage(R.domElement,0,0,c.width,c.height);}
+  R.render(scene,cam);const x=c._x||(c._x=c.getContext('2d'));x.clearRect(0,0,c.width,c.height);x.drawImage(R.domElement,0,0,c.width,c.height);if(pd.ph)gauge(x,c,pd);}
+ function gauge(x,c,pd){const W=c.width,s=W/260,lv=({hi:0,mid:1,lo:2})[pd.ph],gx=9*s,gy=9*s,gh=46*s;
+  x.save();x.fillStyle='rgba(8,10,14,.72)';x.beginPath();if(x.roundRect)x.roundRect(gx-4*s,gy-4*s,15*s,gh+8*s,5*s);else x.rect(gx-4*s,gy-4*s,15*s,gh+8*s);x.fill();
+  for(let i=0;i<3;i++){x.beginPath();x.arc(gx+3.5*s,gy+3*s+i*(gh-6*s)/2,3.2*s,0,6.3);x.fillStyle=i===lv?'#ff5a1f':'rgba(255,255,255,.3)';x.fill();}
+  if(W>260&&pd.phl){const t=pd.phl.toUpperCase();x.font='700 '+Math.round(11*s)+'px system-ui,sans-serif';const tw=x.measureText(t).width;x.fillStyle='rgba(8,10,14,.72)';x.fillRect(gx+13*s,gy-4*s,tw+12*s,18*s);x.fillStyle='#ff8a55';x.textBaseline='middle';x.fillText(t,gx+19*s,gy+5*s);}
+  x.restore();}
  const fits={};const c_mk=mc=>{for(const k in machCache)if(machCache[k]===mc)return k;return'';};
  function fitFor(pat,pd,mc){const fk=pat+(mc?'|'+c_mk(mc):'');if(fits[fk])return fits[fk];let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,z1=12;for(let i=0;i<10;i++){const j=joints3(jointsAt(pd,i/10+1e-6),pd,pat);[j.P,j.N,j.Hd].concat(Object.values(j.E),Object.values(j.W),Object.values(j.K),Object.values(j.F),Object.values(j.T)).forEach(v=>{x0=Math.min(x0,v.x);x1=Math.max(x1,v.x);y0=Math.min(y0,v.y);y1=Math.max(y1,v.y);z1=Math.max(z1,Math.abs(v.z));});}
-  y1+=9;y0=Math.min(y0,0);x0-=7;x1+=7;if(mc&&mc.box){x0=Math.min(x0,mc.box.min.x-2);x1=Math.max(x1,mc.box.max.x+2);y1=Math.max(y1,Math.min(mc.box.max.y+3,100));z1=Math.max(z1,Math.min(24,mc.box.max.z));}const a=(pd.fv?64:30)*Math.PI/180,w=(x1-x0)*Math.cos(a)+2*(z1+6)*Math.sin(a)+16,h=(y1-y0)+14;
+  y1+=9;y0=Math.min(y0,0);x0-=7;x1+=7;if(pd.ph){y1=Math.max(y1,92);if(pd.eq==='cross'){x0=Math.min(x0,-16);z1=Math.max(z1,38);}else{const an=pd.anchor||[94,30];if(an[0]>50)x1=Math.max(x1,an[0]-50+14);else x0=Math.min(x0,an[0]-50-14);}}if(mc&&mc.box){x0=Math.min(x0,mc.box.min.x-2);x1=Math.max(x1,mc.box.max.x+2);y1=Math.max(y1,Math.min(mc.box.max.y+3,100));z1=Math.max(z1,Math.min(24,mc.box.max.z));}const a=(pd.az||(pd.fv?64:30))*Math.PI/180,w=(x1-x0)*Math.cos(a)+2*(z1+6)*Math.sin(a)+16,h=(y1-y0)+14;
   const k=Math.max(.6,Math.min(1.3,Math.max(h/94,w/100)));return fits[fk]={k:k,cx:(x0+x1)/2*(k<1?.8:0),cy:Math.max(30*k+6,(y0+y1)/2)};}
  let run=false,last=0,vis=new Set(),io=null;
  function loop(now){const l=document.querySelectorAll('canvas.fig3d');if(!l.length||document.hidden){run=false;return;}
