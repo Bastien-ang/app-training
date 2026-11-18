@@ -110,8 +110,8 @@
   });}
  /* ---------- surbrillance du muscle ciblé ---------- */
  const GL={quad:['thighL','thighR'],ham:['thighL','thighR'],glute:['pelvis','shortL','shortR','hipL','hipR'],calf:['shinL','shinR'],chest:['chest'],lat:['chest','abs'],abs:['abs'],delt:['deltL','deltR'],tri:['uaL','uaR'],bi:['uaL','uaR']};
- const _ca=new T.Color(ACC);
- function setGlow(mu,t){glow.forEach(k=>{const m=body[k].material;m.emissive.setHex(0);if(m.userData.c0!==undefined)m.color.setHex(m.userData.c0);});glow=GL[mu]||[];const a=.5+.5*Math.sin(t*4.5);glow.forEach(k=>{const m=body[k].material;if(m.userData.c0===undefined)m.userData.c0=m.color.getHex();m.color.setHex(m.userData.c0).lerp(_ca,.42+.2*a);m.emissive.setHex(ACC);m.emissiveIntensity=.16+.16*a;});}
+ const _ca=new T.Color(ACC),_cs=new T.Color(0x6ab7ff);
+ function setGlow(mu,t){glow.forEach(k=>{const m=body[k].material;m.emissive.setHex(0);if(m.userData.c0!==undefined)m.color.setHex(m.userData.c0);});const pr=GL[mu]||[],sc=[];(SEC[mu]||[]).forEach(q=>(GL[q]||[]).forEach(k=>{if(pr.indexOf(k)<0&&sc.indexOf(k)<0)sc.push(k);}));glow=pr.concat(sc);const a=.5+.5*Math.sin(t*4.5);sc.forEach(k=>{const m=body[k].material;if(m.userData.c0===undefined)m.userData.c0=m.color.getHex();m.color.setHex(m.userData.c0).lerp(_cs,.38);m.emissive.setHex(0x2a6fb0);m.emissiveIntensity=.14;});pr.forEach(k=>{const m=body[k].material;if(m.userData.c0===undefined)m.userData.c0=m.color.getHex();m.color.setHex(m.userData.c0).lerp(_ca,.42+.2*a);m.emissive.setHex(ACC);m.emissiveIntensity=.16+.16*a;});}
  /* ---------- matériel ---------- */
  const ZAX=V(0,0,1);
  function seg(o,A,B){return bone(o,A,B,{base:1});}
