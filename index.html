@@ -267,6 +267,13 @@ h1.d,#top h1{font-size:1.02rem;letter-spacing:.01em;font-weight:600;text-transfo
 .crs.on{color:var(--fog)}
 .crs.on .grow{text-decoration:line-through}
 .crs.on .bx{border-color:var(--rust)}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.opt{border:1px solid var(--line);background:var(--panel2);color:var(--fog);border-radius:8px;padding:8px 11px;font-size:13px;font-weight:500}
+.opt.on{border-color:var(--rust);color:var(--snow);background:var(--panel)}
+.palbar{display:flex;gap:4px;margin-top:10px}
+.palbar i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.palbar i.on{background:var(--rust)}
+.xtra{color:var(--sun)}
 </style>
 <div id="shell"><nav id="nav"></nav><div id="main"><header id="top"><h1 class="d">Entraînement</h1><span id="sv"></span></header><main id="view"></main></div></div>
 <div id="timer"><span class="tt">0:00</span><button data-a="tAdd">+15 s</button><button data-a="tStop">Stop</button></div>
