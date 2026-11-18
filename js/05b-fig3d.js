@@ -3,9 +3,9 @@
 (function(){
  if(typeof THREE==='undefined')return;
  const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
- let R=null,scene,cam,ok=false,body={},eqp={},decoCache={},curDeco=null,glow=[];
+ let R=null,scene,cam,ok=false,body={},eqp={},decoCache={},curDeco=null,glow=[],MD=[],muscleMat={};
  const RW=420,RH=Math.round(420*94/100);
- const SK=0xc68863,SK2=0xb87a56,SHIRT=0x3a3f4a,SHORT=0x15161a,SHOE=0xe9e9ea,HAIR=0x2a1f1a,METAL=0x8d939c,DARK=0x1c1d21,PAD=0x101114,ACC=0xff5a1f,FRAME=0x4a4f58;
+ const SK=0xc68863,SK2=0xb87a56,SHIRT=0x3a3f4a,SHORT=0x15161a,SHOE=0xe9e9ea,HAIR=0x2a1f1a,METAL=0x8d939c,DARK=0x1c1d21,PAD=0x101114,ACC=0xff5a1f,FRAME=0x4a4f58,MBASE=0xc98a64;
  const mat=(c,o)=>new T.MeshStandardMaterial(Object.assign({color:c,roughness:.62,metalness:.05},o||{}));
  /* géométries */
  function lathe(prof,seg){const pts=[new T.Vector2(0,prof[0][0])];prof.forEach(p=>pts.push(new T.Vector2(p[1],p[0])));pts.push(new T.Vector2(0,prof[prof.length-1][0]));return new T.LatheGeometry(pts,seg||16);}
@@ -21,8 +21,8 @@
   /* tronc : profil (hauteur, rayon latéral), aplati en profondeur */
   const flat=(geo,d)=>{geo.scale(d,1,1);return geo;};
   g('pelvis',flat(lathe([[-1.2,4.2],[0,5.6],[2.5,6.5],[5.5,6.2],[7.5,5.7]],22),.76),mat(SHORT));
-  g('abs',flat(lathe([[6.8,5.7],[9,5.5],[12,6.3],[14.5,7.4]],22),.66),mat(SHIRT));
-  g('chest',flat(lathe([[14,7.3],[16.5,8.4],[19,8.9],[20.8,8.2],[22.2,5.6],[23.4,2.6]],22),.66),mat(SHIRT));
+  g('abs',flat(lathe([[6.8,5.7],[9,5.5],[12,6.3],[14.5,7.4]],22),.66),mat(SK2));
+  g('chest',flat(lathe([[14,7.3],[16.5,8.4],[19,8.9],[20.8,8.2],[22.2,5.6],[23.4,2.6]],22),.66),mat(SK2));
   g('neck',lathe([[0,2.5],[.5,2.1],[1,2.0]],12),skin());
   g('head',new T.SphereGeometry(1,22,18),skin());
   g('hair',new T.SphereGeometry(1,20,14,0,Math.PI*2,0,Math.PI*.5),mat(HAIR,{roughness:.9}));g('earL',new T.SphereGeometry(.9,8,6),skin(),false);g('earR',new T.SphereGeometry(.9,8,6),skin(),false);g('eyeL',new T.SphereGeometry(.42,8,6),mat(0x1a1310,{roughness:.3}),false);g('eyeR',new T.SphereGeometry(.42,8,6),mat(0x1a1310,{roughness:.3}),false);
@@ -34,7 +34,7 @@
    g('fa'+s,lathe([[0,2.15],[.25,2.5],[.6,1.95],[1,1.45]],14),skin());
    g('hand'+s,new T.SphereGeometry(1,10,8),skin());
    g('hip'+s,new T.SphereGeometry(4.75,14,12),mat(SHORT));
-   g('short'+s,lathe([[0,4.8],[.25,4.95],[.5,4.55]],16),mat(SHORT));
+   g('short'+s,lathe([[0,4.8],[.14,4.95],[.3,4.55]],16),mat(SHORT));
    g('thigh'+s,lathe([[0,4.6],[.3,4.8],[.7,3.9],[1,3.1]],16),skin());
    g('knee'+s,new T.SphereGeometry(3.05,12,10),skin());
    g('shin'+s,lathe([[0,3.0],[.28,3.5],[.6,2.6],[1,1.8]],14),skin());
@@ -42,6 +42,23 @@
    g('shoe'+s,new T.SphereGeometry(1,14,10),mat(SHOE,{roughness:.5}));
    g('sole'+s,new T.SphereGeometry(1,14,6,0,Math.PI*2,Math.PI*.55,Math.PI*.45),mat(0x2c2f36,{roughness:.8}));
   });
+
+  /* ---------- muscles anatomiques (ellipsoïdes à fibres, posés sur chaque segment) ---------- */
+  {const fc=document.createElement('canvas');fc.width=128;fc.height=8;const fx=fc.getContext('2d');for(let i=0;i<128;i++){const v=105+Math.random()*110|0;fx.fillStyle='rgb('+v+','+v+','+v+')';fx.fillRect(i,0,1,8);}
+   const FT=new T.CanvasTexture(fc);FT.wrapS=FT.wrapT=T.RepeatWrapping;FT.repeat.set(3,1);
+   const GM={};['chest','abs','lat','delt','tri','bi','fore','quad','ham','calf'].forEach(k=>{GM[k]=mat(MBASE,{roughness:.46,bumpMap:FT,bumpScale:.9});});muscleMat=GM;
+   const D=[/* g, parent, sym, x, y, z, rx, ry, rz  (torse : unités locales ; membres : x = avant, y = fraction du segment, z = côté) */
+    ['chest','T',1,3.9,18.4,3.9,2.5,3.1,4.2],['chest','T',1,3.4,21.0,3.7,2.0,1.5,3.6],
+    ['abs','T',1,2.9,8.0,1.75,1.5,1.35,1.9],['abs','T',1,3.2,10.6,1.8,1.5,1.35,1.95],['abs','T',1,3.6,13.2,1.85,1.5,1.4,2.0],
+    ['abs','T',1,1.6,9.6,6.0,1.9,3.6,1.8],['abs','T',1,2.0,15.6,6.4,1.5,2.0,1.5],
+    ['lat','T',1,-3.4,14.8,6.0,2.1,5.2,3.0],['lat','T',1,-3.2,21.4,3.3,2.6,1.8,3.7],['lat','T',1,-3.6,18.0,2.2,2.0,3.2,2.2],
+    ['delt','ua',1,.2,.1,.6,3.0,.2,3.1],
+    ['bi','ua',1,1.5,.42,0,2.2,.36,2.1],['tri','ua',1,-1.5,.42,.9,2.3,.38,1.7],['tri','ua',1,-1.3,.38,-1.0,2.1,.34,1.4],
+    ['fore','fa',1,.7,.22,0,1.9,.27,1.7],['fore','fa',1,-.7,.3,0,1.6,.3,1.5],
+    ['quad','thigh',1,2.2,.5,0,2.5,.42,2.5],['quad','thigh',1,.5,.5,2.7,2.3,.38,1.8],['quad','thigh',1,1.9,.8,-1.9,2.0,.15,1.7],
+    ['ham','thigh',1,-2.6,.48,0,2.4,.42,2.8],
+    ['calf','shin',1,-2.0,.3,1.1,2.1,.26,1.5],['calf','shin',1,-2.0,.3,-1.1,2.1,.26,1.5]];
+   MD=[];D.forEach(d=>{(d[2]?['L','R']:[null]).forEach(s=>{const o=mesh(new T.SphereGeometry(1,22,16),GM[d[0]]);MD.push({o:o,g:d[0],p:d[1],s:s,x:d[3],y:d[4],z:d[5],rx:d[6],ry:d[7],rz:d[8]});});});}
   /* matériel réutilisable */
   const metal=()=>mat(METAL,{metalness:.75,roughness:.32}),dark=()=>mat(DARK,{roughness:.55,metalness:.3});
   const cyl=(r,m)=>{const o=mesh(new T.CylinderGeometry(r,r,1,14),m);o.geometry.translate(0,.5,0);return o;};
@@ -108,10 +125,21 @@
    const fm=new T.Matrix4().makeBasis(_x,_y,_z);fm.setPosition(sc0);
    body['shoe'+s].matrix.copy(fm).scale(_s.set(2.5,5.0,2.9));body['sole'+s].matrix.copy(fm).multiply(new T.Matrix4().makeRotationZ(-Math.PI/2)).scale(_s.set(5.1,2.6,3.0));
   });}
- /* ---------- surbrillance du muscle ciblé ---------- */
- const GL={quad:['thighL','thighR'],ham:['thighL','thighR'],glute:['pelvis','shortL','shortR','hipL','hipR'],calf:['shinL','shinR'],chest:['chest'],lat:['chest','abs'],abs:['abs'],delt:['deltL','deltR'],tri:['uaL','uaR'],bi:['uaL','uaR']};
- const _ca=new T.Color(ACC),_cs=new T.Color(0x6ab7ff);
- function setGlow(mu,t){glow.forEach(k=>{const m=body[k].material;m.emissive.setHex(0);if(m.userData.c0!==undefined)m.color.setHex(m.userData.c0);});const pr=GL[mu]||[],sc=[];(SEC[mu]||[]).forEach(q=>(GL[q]||[]).forEach(k=>{if(pr.indexOf(k)<0&&sc.indexOf(k)<0)sc.push(k);}));glow=pr.concat(sc);const a=.5+.5*Math.sin(t*4.5);sc.forEach(k=>{const m=body[k].material;if(m.userData.c0===undefined)m.userData.c0=m.color.getHex();m.color.setHex(m.userData.c0).lerp(_cs,.38);m.emissive.setHex(0x2a6fb0);m.emissiveIntensity=.14;});pr.forEach(k=>{const m=body[k].material;if(m.userData.c0===undefined)m.userData.c0=m.color.getHex();m.color.setHex(m.userData.c0).lerp(_ca,.42+.2*a);m.emissive.setHex(ACC);m.emissiveIntensity=.16+.16*a;});}
+ /* ---------- muscles : placement sur le squelette, contraction visible, principal orange / secondaires bleu ---------- */
+ const GL={glute:['pelvis','shortL','shortR','hipL','hipR']};
+ const _ca=new T.Color(0xe2401a),_cs=new T.Color(0x3f86e0),_cb=new T.Color(MBASE),_cc=new T.Color(),_PL=new T.Matrix4(),_LL=new T.Matrix4(),_SS=new T.Matrix4();
+ function setGlow(mu,t,ph){
+  glow.forEach(k=>{const m=body[k].material;m.emissive.setHex(0);if(m.userData.c0!==undefined)m.color.setHex(m.userData.c0);});
+  const ex=.3+.7*Math.abs(Math.sin(2*Math.PI*(ph||0))),sec=SEC[mu]||[],bu={};
+  for(const g in muscleMat){const m=muscleMat[g];let w=0,e=0,b=1;
+   if(g===mu){w=.4+.5*ex;e=.34*ex;b=1+.2*ex;_cc.copy(_ca);}else if(sec.indexOf(g)>=0){w=.34;e=.1;b=1.06;_cc.copy(_cs);}
+   m.color.copy(_cb);if(w){m.color.lerp(_cc,w);m.emissive.copy(_cc);m.emissiveIntensity=e;}else{m.emissive.setHex(0);m.emissiveIntensity=0;}bu[g]=b;}
+  MD.forEach(d=>{const P=d.p==='T'?body.abs.matrix:body[d.p+d.s].matrix,sg=d.s==='R'?1:-1,b=bu[d.g]||1;
+   if(d.p==='T')_LL.makeTranslation(d.x,d.y,(d.s?sg:1)*d.z);else _LL.makeTranslation(-d.x,d.y,sg*d.z);
+   _SS.makeScale(d.rx*b,d.ry*(2-b*.5-.5),d.rz*b);d.o.matrix.copy(P).multiply(_LL).multiply(_SS);d.o.visible=true;});
+  glow=[];const pr=GL[mu]||[],ps=[];(SEC[mu]||[]).forEach(q=>(GL[q]||[]).forEach(k=>ps.push(k)));
+  pr.forEach(k=>{const m=body[k].material;if(m.userData.c0===undefined)m.userData.c0=m.color.getHex();m.color.setHex(m.userData.c0).lerp(_ca,.55);m.emissive.copy(_ca);m.emissiveIntensity=.3*ex;glow.push(k);});
+  ps.forEach(k=>{const m=body[k].material;if(m.userData.c0===undefined)m.userData.c0=m.color.getHex();m.color.setHex(m.userData.c0).lerp(_cs,.4);m.emissive.copy(_cs);m.emissiveIntensity=.1;glow.push(k);});}
  /* ---------- matériel ---------- */
  const ZAX=V(0,0,1);
  function seg(o,A,B){return bone(o,A,B,{base:1});}
@@ -239,6 +267,13 @@
   else{/* autre machine de marque : colonne de plaques ou râtelier de disques derrière l'athlète */
    const bx=pd.fv?-26:-42;if(pl){[-1,1].forEach(s=>{tube(V(bx,0,s*6),V(bx,34,s*6),1.3);});tube(V(bx,1,-9),V(bx,1,9),1.2);[14,26].forEach(y=>{[-1,1].forEach(s=>{const o=new T.Mesh(new T.CylinderGeometry(6,6,3.2,18),wm);o.rotation.x=Math.PI/2;o.position.set(bx,y,s*9.2);o.castShadow=true;grp.add(o);const c=new T.Mesh(new T.CylinderGeometry(1.4,1.4,4,10),am);c.rotation.x=Math.PI/2;c.position.set(bx,y,s*9.6);grp.add(c);});});}
    else stack(bx,0);}
+  /* assise + dossier rembourrés qui suivent le bassin et le dos */
+  if({chestpress:1,shpressm:1,pecdeck:1,pecdeckrev:1,latmach:1,legext:1,legcurl:1,pulldown:1,machrow:1,highrow:1,hbench:1}[pat]){const up=mat(b==='tg'?0x1f2024:b==='hs'?0x16171a:b==='g8'?0x101114:0x15161a,{roughness:.8}),sp=new T.Mesh(new T.BoxGeometry(15,3.4,15.5),up),bp=new T.Mesh(new T.BoxGeometry(3.4,25,15),up),ac=new T.Mesh(new T.BoxGeometry(.5,22,2.2),am);
+   [sp,bp,ac].forEach(o=>{o.matrixAutoUpdate=false;o.castShadow=true;grp.add(o);});
+   upd.push(j=>{const h=mid(j.H.L,j.H.R),ty=V().subVectors(j.N,j.P).normalize(),bk=V().crossVectors(ZAX,ty).normalize();
+    _m.makeTranslation(h.x+1.5,h.y-5.2,0);sp.matrix.copy(_m);
+    const c=mid(j.P,j.N).addScaledVector(bk,6.6).addScaledVector(ty,3);_m.makeBasis(bk,ty,ZAX);_m.setPosition(c);bp.matrix.copy(_m);
+    _m.makeBasis(bk,ty,ZAX);_m.setPosition(c.clone().addScaledVector(bk,-1.8));ac.matrix.copy(_m);});}
   /* progression 0..1 du mouvement (main ou pied entre les deux poses extrêmes) */
   const leg=pat==='legext'||pat==='legcurl'||pat==='legpress'||pat==='hack';
   const j0=joints3(jointsAt(pd,1e-6),pd,pat),j1=joints3(jointsAt(pd,.5),pd,pat),q=j=>leg?(pat==='hack'?j.N:j.F.R):j.W.R,A0=q(j0).clone(),D=V().subVectors(q(j1),A0),dl=D.lengthSq()||1;
@@ -255,10 +290,10 @@
    const disc=new T.Mesh(new T.CircleGeometry(58,48),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.045,depthWrite:false}));disc.rotation.x=-Math.PI/2;disc.position.y=-.05;scene.add(disc);
    build();ok=true;}catch(e){ok=false;}}
  function frame(c,now){const pat=c.dataset.pat,pd=PATS[pat];if(!pd)return;const t=((now/1000)/pd.dur)%1,J=jointsAt(pd,t),j=joints3(J,pd,pat);
-  pose(j);setGlow(MU[pat],now/1000);const sm_=c.dataset.smith==='1';let eq_=c.dataset.eq;if(c.dataset.mk&&c.dataset.mk.indexOf('gen')!==0&&!sm_&&(eq_==='bar'||eq_==='db'))eq_='handle';equip(eq_,j,J,pd,sm_);
+  pose(j);setGlow(MU[pat],now/1000,t);const sm_=c.dataset.smith==='1';let eq_=c.dataset.eq;if(c.dataset.mk&&c.dataset.mk.indexOf('gen')!==0&&!sm_&&(eq_==='bar'||eq_==='db'))eq_='handle';equip(eq_,j,J,pd,sm_);
   const dg=decoFor(pat,pd);if(curDeco&&curDeco!==dg)curDeco.visible=false;dg.visible=true;curDeco=dg;
   const mc=machFor(pat,pd,c.dataset.mk);if(curMach&&curMach!==mc)curMach.grp.visible=false;if(mc){mc.grp.visible=true;mc.update(j);}curMach=mc;
-  const az=((pd.az||(pd.fv?64:30))+5*Math.sin(now/2600))*Math.PI/180,el=13*Math.PI/180,ft=fitFor(pat,pd,mc),D=216*ft.k,ty=ft.cy,tx=ft.cx;
+  const azb=pd.az||(pd.fv?64:(c.dataset.mk||pd.deco&&/dips|hanging/.test(pat)?30:({lat:145,ham:150,glute:150,tri:78,calf:150})[MU[pat]]||30)),az=(azb+5*Math.sin(now/2600))*Math.PI/180,el=13*Math.PI/180,ft=fitFor(pat,pd,mc),D=216*ft.k,ty=ft.cy,tx=ft.cx;
   cam.position.set(tx+Math.sin(az)*Math.cos(el)*D,ty+Math.sin(el)*D,Math.cos(az)*Math.cos(el)*D);cam.lookAt(tx,ty,0);
   R.render(scene,cam);const x=c._x||(c._x=c.getContext('2d'));x.clearRect(0,0,c.width,c.height);x.drawImage(R.domElement,0,0,c.width,c.height);if(pd.ph)gauge(x,c,pd);}
  function gauge(x,c,pd){const W=c.width,s=W/260,lv=({hi:0,mid:1,lo:2})[pd.ph],gx=9*s,gy=9*s,gh=46*s;
