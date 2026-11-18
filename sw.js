@@ -1,4 +1,4 @@
-const V='hx-v21';
+const V='hx-v22';
 self.addEventListener('install',e=>{self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
 /* réseau d'abord (toujours la dernière version), cache en secours hors connexion */
