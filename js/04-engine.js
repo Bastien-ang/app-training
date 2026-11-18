@@ -107,7 +107,7 @@ function weekVolume(mon){
   (S.acts[d]||[]).forEach(a=>{(a.ex||[]).forEach(x=>{if(!MUSCLES.includes(x.m))return;const n=num(x.sets)||1;sets[x.m]+=n;nSets+=n;const t=num(x.w)*num(x.reps)*n;ton[x.m]+=t;tonT+=t;});});}
  return{sets:sets,ton:ton,tonT:tonT,nSets:nSets};}
 function plannedVolume(mon){const sets=emptyVol();
- ['lun','mar','mer','jeu','ven'].forEach((id,i)=>{const d=addDays(mon,i);if(S.skip[d])return;const P=progOf(d,id),SO=soirOf(P,d);if(!P||!SO)return;
+ ['lun','mar','mer','jeu','ven','sam','dim'].forEach((id,i)=>{const d=addDays(mon,i);if(S.skip[d])return;const P=progOf(d,id),SO=soirOf(P,d);if(!P||!SO)return;
   SO.blocks.forEach(b=>b.ex.forEach(x=>{const it=resolve(x);if(!it.m)return;const n=setsFor(it,d);[].concat(it.m).forEach(m=>{sets[m]+=n;});(it.s||[]).forEach(m=>{sets[m]+=n*.5;});}));});
  return sets;}
 
@@ -118,7 +118,7 @@ function acwr(){const t=today();let a=0,c=0,days=0;for(let i=0;i<28;i++){const l
 
 /* ---- séances comptées ---- */
 function weekCounts(mon){let done=0,planned=0,extra=0;
- ['lun','mar','mer','jeu','ven'].forEach((id,i)=>{const d=addDays(mon,i),L=S.logs[d]||{};const PP=progOf(d,id);if(PP.soir&&!S.skip[d])planned++;if(L.fin)done++;if(PP.run&&PP.run!=='wed'){planned++;if(L.run&&L.run.fin)done++;}});
+ ['lun','mar','mer','jeu','ven','sam','dim'].forEach((id,i)=>{const d=addDays(mon,i),L=S.logs[d]||{};const PP=progOf(d,id);if(PP.soir&&!S.skip[d])planned++;if(L.fin)done++;if(PP.run&&PP.run!=='wed'){planned++;if(L.run&&L.run.fin)done++;}});
  for(let i=0;i<7;i++)extra+=(S.acts[addDays(mon,i)]||[]).length;return{done:done,planned:planned,extra:extra};}
 function totalLogged(){let n=0;Object.keys(S.logs).forEach(d=>{const L=S.logs[d];if(L.fin)n++;if(L.run&&L.run.fin)n++;});Object.keys(S.acts).forEach(d=>n+=S.acts[d].length);return n;}
 function dayDone(d){const L=S.logs[d]||{};return !!(L.fin||(L.run&&L.run.fin)||(S.acts[d]&&S.acts[d].length));}

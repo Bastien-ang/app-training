@@ -1,41 +1,51 @@
 /* ===================== PRISE DE MASSE : salle en priorité, 1–2 courses, cardio plus long en fin de séance, week-end souple + plan alimentaire ===================== */
 (function(){
  window.hxTplExt=window.hxTplExt||{};window.hxSwExt=window.hxSwExt||[];
- /* ---------- 1. cardio de fin de séance : 40 min, allure facile ---------- */
- const cz=(id,name,txt,ph)=>{def(id,{name:name,txt:txt,kind:'cardio',ph:ph||'km ou calories'});};
- cz('cz-bike40','Vélo — cardio facile 40 min','40 min allure facile, tu parles sans t\'essouffler (≈ 65 % FC max). Pas de sprint : on garde les calories pour la prise de masse.');
- cz('cz-incline40','Marche en pente — 40 min','40 min, pente 8–12 %, 5–6 km/h, sans te tenir. Fréquence cardiaque basse, respiration calme.','km');
- cz('cz-elliptic40','Elliptique — 40 min','40 min allure facile, résistance modérée.');
- cz('cz-row30','Rameur facile — 30 min','30 min cadence 20 coups/min, allure facile (le rameur sollicite aussi le dos : reste souple).','mètres');
- ALT['cz-bike40']=[['Vélo semi-allongé — 40 min',0,'km'],['Assault bike facile — 30 min',0,'cal']];
- ALT['cz-incline40']=[['Tapis — marche rapide 40 min',0,'km']];
- ALT['cz-elliptic40']=[['Stepper / escalier — 30 min',0,'km']];
- ALT['cz-row30']=[['SkiErg facile — 25 min',0,'m']];
- CZ.splice(0,4,'cz-bike40','cz-incline40','cz-elliptic40','cz-row30');
- ['lun','mar','mer'].forEach(k=>{const s=PROG2[k].soir;
-  ['A','B'].forEach(v=>{(s[v]||[]).forEach(b=>{if(/^Cardio facile/.test(b.n))b.n='Cardio facile · 40 min';});});
-  s.min+=10;s.dur=Math.floor(s.min/60)+'h'+String(s.min%60).padStart(2,'0');
-  s.note=s.note.replace(/Cardio après la muscu, allure où tu peux parler\./,'Cardio de 40 min après la muscu, allure où tu peux parler : on brûle un peu de gras sans freiner la prise de masse.');});
+ /* ---------- 1. programme prise de masse : 5 séances, chaque muscle 2× par semaine, sans cardio de fin de séance ---------- */
+ const S5=(title,short,min,A,B,note)=>({title:title,short:short,dur:Math.floor(min/60)+'h'+String(min%60).padStart(2,'0'),min:min,A:A,B:B,note:note});
+ PROG2.lun.soir=S5('Pecs / Épaules / Triceps — lourd','Push lourd',80,
+  [{n:'Pecs · 35 min',ex:['push-bench','push-incline','push-fly']},{n:'Épaules · 20 min',ex:['push-ohp','push-lateral']},{n:'Triceps · 18 min',ex:['pec-skull','push-tri']}],
+  [{n:'Pecs · 35 min',ex:['pec-dbpress','pec-incbar','pec-deck']},{n:'Épaules · 20 min',ex:['sh-dbpress','sh-latcable']},{n:'Triceps · 18 min',ex:['pec-skull','pec-rope']}],
+  'Séance lourde : 1ère série de chaque exo près de l\'échec (1 rep en réserve), repos 2–3 min sur les mouvements de base. Descente contrôlée 2–3 s, étirement complet en bas. Pas de cardio après : on garde l\'énergie pour manger et récupérer.');
+ PROG2.mar.soir=S5('Jambes A — quadriceps','Jambes A',75,
+  [{n:'Jambes · 60 min',ex:['leg-squat','leg-press','leg-ext','leg-curl','leg-calf']},{n:'Abdos · 10 min',ex:['th-hanging']}],
+  [{n:'Jambes · 60 min',ex:['leg-press','ven-lunges','leg-ext','leg-curl','th-calfseat']},{n:'Abdos · 10 min',ex:['th-hanging']}],
+  'Jour des quadriceps : profondeur complète au squat, repos 3 min. 2 séries de montée en charge avant la première série lourde. Bois et mange bien avant, c\'est la séance la plus coûteuse de la semaine.');
+ PROG2.mer.soir=S5('Dos / Biceps — lourd','Pull lourd',80,
+  [{n:'Dos · 45 min',ex:['pull-pullup','pull-rowbar','pull-rowcable','pull-pulldown']},{n:'Arrière d\'épaule · 8 min',ex:['sh-birds']},{n:'Biceps · 18 min',ex:['pull-curlbar','pull-curlinc']}],
+  [{n:'Dos · 45 min',ex:['back-pulldown','back-tbar','back-dbrow','back-pullover']},{n:'Arrière d\'épaule · 8 min',ex:['pull-face']},{n:'Biceps · 18 min',ex:['back-curlham','back-curlcable']}],
+  'Tire avec les coudes, serre les omoplates en fin de mouvement, descente lente. Biceps en fin de séance, sans élan.');
+ PROG2.jeu.soir=S5('Épaules / Bras + rappel pecs & dos','Épaules + bras',75,
+  [{n:'Épaules · 25 min',ex:['sh-dbpress','sh-latcable','pull-face']},{n:'Rappel pecs / dos · 18 min',ex:['pec-incbar','back-pulldown']},{n:'Bras · 25 min (biset conseillé)',ex:['pull-curlbar','push-tri','back-curlham','pec-rope']}],
+  [{n:'Épaules · 25 min',ex:['sh-arnold','push-lateral','sh-birds']},{n:'Rappel pecs / dos · 18 min',ex:['pec-deck','pull-rowcable']},{n:'Bras · 25 min (biset conseillé)',ex:['back-curlcable','pec-skull','pull-curlinc','push-tri']}],
+  'Séance de volume : séries propres, 1–2 reps en réserve, repos 90 s. Les bras en biset (curl puis triceps sans pause) : bouton « Enchaîner avec le suivant ». 2e passage de la semaine pour pecs, dos et épaules.');
+ PROG2.jeu.title=undefined;
+ PROG2.dim=Object.assign({},PROG2.dim,{diff:'bleue',rest:false,short:'Jambes B',title:undefined,note:undefined,
+  soir:S5('Jambes B — ischios / fessiers / mollets + abdos','Jambes B',70,
+  [{n:'Ischios / fessiers · 45 min',ex:['leg-rdl','th-hipthrust','leg-curl']},{n:'Mollets · 10 min',ex:['th-calfseat']},{n:'Abdos · 12 min',ex:['th-hanging','pull-plank']}],
+  [{n:'Ischios / fessiers · 45 min',ex:['th-hipthrust','leg-rdl','leg-curl']},{n:'Mollets · 10 min',ex:['leg-calf']},{n:'Abdos · 12 min',ex:['th-hanging','jeu-side']}],
+  'Dimanche soir, après ta sortie : 2e séance de jambes de la semaine, centrée sur l\'arrière des cuisses et les fessiers (la veille de la reprise, mardi, tu as 48 h de récup). Si tu as roulé très fort ou skié toute la journée, descends de 1 série par exo, ou bascule sur Repos.')});
  /* ---------- 2. course : 1 sortie facile le jeudi midi (la 2e = option week-end) ---------- */
  PROG2.jeu.run='jeu';
- PROG2.jeu.soir.title='Épaules + rappel bras / tractions / dips (+ course midi)';
  RUNC.jeu[3]={name:'Tempo court',seg:1000,base:300,est:40,det:'10 min facile + 15 min allure soutenue (tu ne dis que quelques mots) + 10 min facile — pas plus : on garde de l\'énergie pour la salle'};
  RUNC.jeu[4]={name:'Course facile + 6 lignes droites',seg:1000,base:320,est:45,det:'35–40 min facile, dont 6 lignes droites de 20 s foulée rapide mais détendue (récup 1 min trot) — fluidité, sans fatigue'};
  /* ---------- 3. week-end : ski / moto, ou salle bonus ---------- */
- PROG2.ven.title='Libre — moto à partir de l\'après-midi (ou salle le matin)';
- PROG2.ven.note='Si tu as envie de salle le matin : « Changer de séance » → Week-end / bonus → haut du corps. Pas de jambes avant la moto.';
- PROG2.sam.note='Moto, ski ou VTT : logue ta sortie ci-dessous. Si tu restes en ville : « Changer de séance » → Week-end / bonus (course facile ou full body).';
- PROG2.dim.note='Repos, marche, mobilité. Envie de salle ? Full body rapide ou course facile dans « Changer de séance ».';
+ PROG2.ven.title='Libre — moto à partir de l\'après-midi';
+ PROG2.ven.note='Pas de jambes : moto cet après-midi. Si tu veux de la salle le matin : « Changer de séance » → Week-end / bonus → haut du corps.';
+ PROG2.sam.note='Moto, ski ou VTT : logue ta sortie ci-dessous. Dimanche soir : jambes B (ischios / fessiers).';
  def('wk-run',{name:'Course facile — 45 min',txt:'45 min allure facile (zone 2, tu peux parler), terrain plat ou vallonné léger. Termine par 5 min de marche.',kind:'cardio',ph:'km parcourus'});PAT_DEFAULT['wk-run']='run';
  const mk=(t,s,min,diff,note,b)=>({soir:{title:t,short:s,dur:min+' min',min:min,A:b.map(x=>({n:x[0],ex:x[1]})),note:note},short:s,diff:diff,title:undefined,note:undefined,rest:undefined,suggest:undefined,optional:undefined,run:undefined,load:undefined});
- const T={
-  'gx-wk-up':mk('Haut du corps — bras, épaules, abdos','Haut du corps',60,'bleue','Vendredi matin avant la moto : aucun exercice de jambes. Bras en superset, épaules à 1–2 reps de la fin, pas d\'échec pour garder du grip.',[['Échauffement · 8 min',['gx-wu']],['Bras · 20 min (superset)',['pull-curlbar','pec-skull','back-curlham','pec-rope']],['Épaules · 15 min',['push-lateral','sh-birds','pull-face']],['Abdos · 10 min',['pull-crunch','th-hanging']],CDX()]),
-  'gx-wk-full':mk('Full body rapide','Full body',60,'bleue','Week-end sans sortie : une séance complète mais courte, charges modérées, 1–2 reps en réserve. Idéal quand tu as raté une séance de la semaine.',[['Échauffement · 8 min',['gx-wu']],['Force · 40 min',['leg-press','pec-dbpress','pull-pulldown','sh-dbpress','pull-curlbar','push-tri']],['Cardio facile · 10 min',['cz-bike40']],CDX()]),
-  'gx-wk-run':mk('Course facile + gainage','Course + gainage',55,'verte','2e course de la semaine (optionnelle) : allure où tu peux parler, 45 min. Idéal si tu ne roules pas ce week-end. Évite si les jambes sont encore lourdes.',[['Course · 45 min',['wk-run']],['Gainage · 10 min',['pull-plank','th-hanging']]])
- };
  function CDX(){return['Retour au calme',['gx-cd']];}
+ const T={
+  'gx-wk-up':mk('Haut du corps — bras, épaules, abdos','Haut du corps',60,'bleue','Vendredi matin avant la moto : aucun exercice de jambes. Bras en superset, épaules à 1–2 reps de la fin, pas d\'échec pour garder du grip.',[['Échauffement · 8 min',['gx-wu']],['Bras · 20 min (superset)',['pull-curlbar','pec-skull','back-curlham','pec-rope']],['Épaules · 15 min',['push-lateral','sh-birds','pull-face']],['Abdos · 10 min',['th-hanging','pull-plank']],CDX()]),
+  'gx-wk-full':mk('Full body rapide','Full body',60,'bleue','Pour rattraper une séance manquée : une séance complète mais courte, charges modérées, 1–2 reps en réserve.',[['Échauffement · 8 min',['gx-wu']],['Force · 45 min',['leg-press','pec-dbpress','pull-pulldown','sh-dbpress','pull-curlbar','push-tri']],CDX()]),
+  'gx-wk-run':mk('Course facile + gainage','Course + gainage',55,'verte','2e course de la semaine (optionnelle) : allure où tu peux parler, 45 min. À éviter la veille d\'une séance de jambes.',[['Course · 45 min',['wk-run']],['Gainage · 10 min',['pull-plank','th-hanging']]])
+ };
  Object.keys(T).forEach(k=>{window.hxTplExt[k]=()=>T[k];});
- window.hxSwExt.unshift({sec:'Week-end / bonus (priorité salle)',items:[{k:'gx-wk-up',t:'Haut du corps — bras, épaules, abdos',sub:'60 min · sans jambes'},{k:'gx-wk-full',t:'Full body rapide',sub:'60 min'},{k:'gx-wk-run',t:'Course facile + gainage',sub:'55 min'}]});
+ window.hxSwExt.unshift({sec:'Week-end / bonus',items:[{k:'gx-wk-up',t:'Haut du corps — bras, épaules, abdos',sub:'60 min · sans jambes'},{k:'gx-wk-full',t:'Full body rapide',sub:'60 min'},{k:'gx-wk-run',t:'Course facile + gainage',sub:'55 min'}]});
+ /* objectifs caloriques : jour avec séance = jour d'entraînement */
+ const _nt=nutriTargets;
+ nutriTargets=function(d){const r=_nt(d);if(d<V2)return r;const P=progOf(d);const tr=!!(P&&(P.soir||P.run));const k=tr?S.set.kcal:S.set.kcalRest;return Object.assign({},r,{kcal:k,c:Math.round((k*.5)/4/5)*5,f:Math.round((k*.24)/9/5)*5});};
 
  /* ---------- 4. plan alimentaire : 5 repas ---------- */
  const PLAN={"A": {"meals": [{"n": "Petit-déjeuner", "h": "7 h 30", "it": ["90 g flocons d'avoine", "300 ml de lait demi-écrémé", "1 banane", "20 g beurre de cacahuète", "10 g miel"], "k": 731, "p": 28, "c": 103, "f": 21, "note": "Mixe ou mélange avec le lait chaud/froid. Un café ou un thé si tu veux."}, {"n": "Collation du matin", "h": "10 h 30", "it": ["150 g skyr nature", "50 g muesli", "20 g amandes", "1 pomme"], "k": 478, "p": 26, "c": 58, "f": 14, "note": "Se prépare la veille dans une boîte."}, {"n": "Déjeuner", "h": "13 h", "it": ["120 g riz basmati (cru)", "140 g blanc de poulet (cru)", "250 g légumes (haricots verts, brocolis, poêlée…)", "12 g d'huile d'olive", "1 gros kiwi"], "k": 817, "p": 48, "c": 115, "f": 17, "note": "Remplace le poulet par dinde, thon ou œufs (3) quand tu veux varier."}, {"n": "Collation pré-training", "h": "17 h 45", "it": ["2 tranches de pain complet (80 g)", "30 g confiture", "1 banane", "25 g whey"], "k": 483, "p": 29, "c": 80, "f": 4, "note": "À prendre 60 à 90 min avant la séance : glucides faciles, peu de gras et de fibres. Shake de whey dans l'eau."}, {"n": "Dîner (après la séance)", "h": "21 h 15", "it": ["125 g pâtes (crues)", "150 g bœuf haché 5 % (cru)", "150 g sauce tomate nature", "200 g légumes (haricots verts, brocolis, poêlée…)", "10 g d'huile d'olive", "20 g fromage râpé"], "k": 916, "p": 58, "c": 107, "f": 27, "note": "Alternatives : saumon, dinde, œufs ; pâtes → riz ou pommes de terre (350 g)."}], "tot": [3425, 189, 463, 83]}, "B": {"meals": [{"n": "Petit-déjeuner", "h": "", "it": ["80 g flocons d'avoine", "300 ml de lait demi-écrémé", "1 banane", "20 g beurre de cacahuète", "10 g miel"], "k": 694, "p": 27, "c": 97, "f": 21, "note": ""}, {"n": "Collation du matin", "h": "", "it": ["150 g skyr nature", "40 g muesli", "20 g amandes", "1 pomme"], "k": 440, "p": 25, "c": 52, "f": 14, "note": ""}, {"n": "Déjeuner", "h": "", "it": ["100 g riz basmati (cru)", "140 g blanc de poulet (cru)", "250 g légumes (haricots verts, brocolis, poêlée…)", "10 g d'huile d'olive", "1 gros kiwi"], "k": 729, "p": 46, "c": 100, "f": 14, "note": ""}, {"n": "Collation de l'après-midi", "h": "", "it": ["60 g de pain complet (≈ 2 tranches)", "20 g confiture", "150 g fromage blanc 3 %"], "k": 312, "p": 17, "c": 45, "f": 6, "note": "Remplace la collation pré-training."}, {"n": "Dîner", "h": "", "it": ["110 g pâtes (crues)", "140 g pavé de saumon (cru)", "100 g sauce tomate nature", "200 g légumes (haricots verts, brocolis, poêlée…)", "8 g d'huile d'olive", "15 g fromage râpé"], "k": 900, "p": 51, "c": 93, "f": 33, "note": ""}], "tot": [3075, 166, 387, 88]}};
@@ -43,7 +53,7 @@
  PLAN.C.tot=PLAN.C.meals.reduce((a,m)=>[a[0]+m.k,a[1]+m.p,a[2]+m.c,a[3]+m.f],[0,0,0,0]);
  const NAME={A:'Jour de salle (séance 19 h)',B:'Jour léger / repos',C:'Jour de sortie (ski, moto…)'};
  let planT=null;
- const defT=d=>{const i=dayId(d);return i==='sam'||i==='dim'?'B':'A';};
+ const defT=d=>{const P=progOf(d);return P&&P.soir?'A':'B';};
  const _vn=VIEWS.nutri;
  VIEWS.nutri=function(){
   const h=_vn(),d=R.nd,t=planT||defT(d),P=PLAN[t];
@@ -54,7 +64,7 @@
    +'<div style="margin-top:6px"><button class="btn ghost sm" data-a="planAdd" data-t="'+t+'" data-i="'+i+'">+ Ajouter au bilan</button></div></div>';});
   c+='<div class="row wrap" style="margin-top:6px"><button class="btn sm" data-a="planAdd" data-t="'+t+'" data-i="all">Ajouter toute la journée au bilan</button></div>'
    +'<div class="sub" style="margin-top:10px">Eau : 3 L par jour. Créatine : 5 g chaque jour. Pas de balance dans les assiettes ? Une paume de viande ≈ 130–150 g cru, un poing de féculents cuits ≈ 100 g de riz cru.</div></div>';
-  return h.replace('<div class="card"><h3 class="d">Compléments</h3>',c+'<div class="card"><h3 class="d">Compléments</h3>');};
+  const P0=progOf(d);let h2=h;if(P0&&P0.soir)h2=h2.replace('Objectif jour repos','Objectif jour entraînement');return h2.replace('<div class="card"><h3 class="d">Compléments</h3>',c+'<div class="card"><h3 class="d">Compléments</h3>');};
  Object.assign(A,{planSel:d=>{planT=d.t;render(true);},
   planAdd:d=>{const P=PLAN[d.t],n=nutriDay(R.nd);(d.i==='all'?P.meals:[P.meals[+d.i]]).forEach(m=>{n.kcal+=m.k;n.p+=m.p;n.c+=m.c;n.f+=m.f;});save();render(true);}});
  window.hxPlanAlim=PLAN;
