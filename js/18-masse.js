@@ -20,6 +20,8 @@
   [{n:'Épaules · 25 min',ex:['sh-arnold','push-lateral','sh-birds']},{n:'Rappel pecs / dos · 18 min',ex:['pec-deck','pull-rowcable']},{n:'Bras · 25 min (biset conseillé)',ex:['back-curlcable','pec-skull','pull-curlinc','push-tri']}],
   'Séance de volume : séries propres, 1–2 reps en réserve, repos 90 s. Les bras en biset (curl puis triceps sans pause) : bouton « Enchaîner avec le suivant ». 2e passage de la semaine pour pecs, dos et épaules.');
  PROG2.jeu.title=undefined;
+ PROG2.lun.short='Pecs + épaules';PROG2.mar.short='Jambes A';PROG2.mer.short='Dos + biceps';PROG2.jeu.short='Épaules + bras';
+
  PROG2.dim=Object.assign({},PROG2.dim,{diff:'bleue',rest:false,short:'Jambes B',title:undefined,note:undefined,
   soir:S5('Jambes B — ischios / fessiers / mollets + abdos','Jambes B',70,
   [{n:'Ischios / fessiers · 45 min',ex:['leg-rdl','th-hipthrust','leg-curl']},{n:'Mollets · 10 min',ex:['th-calfseat']},{n:'Abdos · 12 min',ex:['th-hanging','pull-plank']}],
@@ -67,5 +69,34 @@
   const P0=progOf(d);let h2=h;if(P0&&P0.soir)h2=h2.replace('Objectif jour repos','Objectif jour entraînement');return h2.replace('<div class="card"><h3 class="d">Compléments</h3>',c+'<div class="card"><h3 class="d">Compléments</h3>');};
  Object.assign(A,{planSel:d=>{planT=d.t;render(true);},
   planAdd:d=>{const P=PLAN[d.t],n=nutriDay(R.nd);(d.i==='all'?P.meals:[P.meals[+d.i]]).forEach(m=>{n.kcal+=m.k;n.p+=m.p;n.c+=m.c;n.f+=m.f;});save();render(true);}});
+
+ /* ---------- 5. le plan alimentaire visible partout : accueil + séance ---------- */
+ const sumOf=P=>P.tot;
+ function planFor(d){return PLAN[defT(d)];}
+ function miniPlan(d,compact){const P=planFor(d),n=nutriDay(d),t=sumOf(P);
+  let h='<div class="card acc" style="--acc:var(--moss)"><div class="rowb"><h3 class="d" style="margin:0">Repas du jour</h3><span class="m sub">'+Math.round(n.kcal)+' / '+t[0]+' kcal</span></div>'
+   +'<div class="bar" style="margin:8px 0 10px"><i style="width:'+Math.min(100,n.kcal/t[0]*100)+'%;--c:var(--moss)"></i></div>';
+  P.meals.forEach((m,i)=>{h+='<div class="ls"><div class="grow"><b>'+esc(m.n)+'</b>'+(m.h?' <span class="sub">'+esc(m.h)+'</span>':'')+'<div class="sub">'+esc(m.it.slice(0,compact?3:9).join(' · '))+(compact&&m.it.length>3?'…':'')+'</div></div><span class="m sub" style="white-space:nowrap">'+m.k+' kcal</span></div>';});
+  h+='<div class="sub" style="margin:8px 0">Total : <b>'+t[0]+' kcal</b> · P '+t[1]+' g · G '+t[2]+' g · L '+t[3]+' g · eau 3 L · créatine 5 g</div>'
+   +'<div class="row wrap"><button class="btn sm" data-a="planAdd" data-t="'+defT(d)+'" data-i="all">Tout ajouter au bilan</button><button class="btn ghost sm" data-a="nav" data-v="nutri">Détail et autres jours</button></div></div>';
+  return h;}
+ const _vh=VIEWS.home;
+ VIEWS.home=function(){const h=_vh(),t=today();
+  const k='<div class="sec"><h2 class="d">Cette semaine</h2></div>';
+  return h.indexOf(k)>-1?h.replace(k,'<div class="sec"><h2 class="d">Nutrition</h2><button class="btn ghost sm" data-a="nav" data-v="nutri" style="margin-left:auto">Bilan</button></div>'+miniPlan(t,true)+k):h+miniPlan(t,true);};
+ const _vd=VIEWS.day;
+ VIEWS.day=function(){const h=_vd(),d=R.d||today(),P=progOf(d);
+  if(!P||!P.soir)return h;
+  const M=planFor(d).meals,pre=M[3],tot=sumOf(planFor(d));
+  const c='<div class="card acc" style="--acc:var(--moss)"><div class="rowb"><h3 class="d" style="margin:0">Avant la séance</h3><span class="m sub">'+pre.k+' kcal · P '+pre.p+'</span></div>'
+   +'<div class="sub" style="margin:6px 0"><b>'+esc(pre.n)+(pre.h?' · '+esc(pre.h):'')+'</b> — '+esc(pre.it.join(' · '))+'</div>'
+   +'<div class="sub">Objectif du jour : '+tot[0]+' kcal, '+tot[1]+' g de protéines. Après la séance, le dîner est le plus gros repas.</div>'
+   +'<div class="row wrap" style="margin-top:8px"><button class="btn sm" data-a="planAdd" data-t="'+defT(d)+'" data-i="3">Collation prise ✓</button><button class="btn ghost sm" data-a="nav" data-v="nutri">Plan complet</button></div></div>';
+  return c+h;};
+ /* bandeau "à savoir" : on remplace le rappel cardio par un rappel nutrition */
+ const _in=insights;
+ insights=function(){const o=_in().filter(x=>!/Cardio du jour/.test(x.x));const t=today(),P=progOf(t);
+  if(P&&P.soir)o.unshift({k:'info',i:'timer',x:'Prise de masse : <b>'+sumOf(planFor(t))[0]+' kcal</b> aujourd\'hui, collation 60–90 min avant la séance, pas de cardio après.'});
+  return o;};
  window.hxPlanAlim=PLAN;
 })();
