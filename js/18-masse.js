@@ -3,22 +3,22 @@
  window.hxTplExt=window.hxTplExt||{};window.hxSwExt=window.hxSwExt||[];
  /* ---------- 1. programme prise de masse : 5 séances, chaque muscle 2× par semaine, sans cardio de fin de séance ---------- */
  const S5=(title,short,min,A,B,note)=>({title:title,short:short,dur:Math.floor(min/60)+'h'+String(min%60).padStart(2,'0'),min:min,A:A,B:B,note:note});
- PROG2.lun.soir=S5('Pecs / Épaules / Triceps — lourd','Push lourd',80,
-  [{n:'Pecs · 35 min',ex:['push-bench','push-incline','push-fly']},{n:'Épaules · 20 min',ex:['push-ohp','push-lateral']},{n:'Triceps · 18 min',ex:['pec-skull','push-tri']}],
-  [{n:'Pecs · 35 min',ex:['pec-dbpress','pec-incbar','pec-deck']},{n:'Épaules · 20 min',ex:['sh-dbpress','sh-latcable']},{n:'Triceps · 18 min',ex:['pec-skull','pec-rope']}],
-  'Séance lourde : 1ère série de chaque exo près de l\'échec (1 rep en réserve), repos 2–3 min sur les mouvements de base. Descente contrôlée 2–3 s, étirement complet en bas. Pas de cardio après : on garde l\'énergie pour manger et récupérer.');
+ PROG2.lun.soir=S5('Pecs / Épaules / Triceps — lourd','Push lourd',88,
+  [{n:'Pecs · 30 min',ex:['push-bench','push-incline','push-fly']},{n:'Dips lestés · 14 min',ex:['push-dips']},{n:'Épaules · 20 min',ex:['push-ohp','push-lateral']},{n:'Triceps · 16 min',ex:['pec-skull','push-tri']}],
+  [{n:'Pecs · 30 min',ex:['pec-dbpress','pec-incbar','pec-deck']},{n:'Dips lestés · 14 min',ex:['push-dips']},{n:'Épaules · 20 min',ex:['sh-dbpress','sh-latcable']},{n:'Triceps · 16 min',ex:['pec-skull','pec-rope']}],
+  'Séance lourde : 1ère série de chaque exo près de l\'échec (1 rep en réserve), repos 2–3 min sur les mouvements de base. Les dips lestés viennent après les presses : buste penché en avant pour les pecs, buste droit pour les triceps. Dès que tu sors 12 reps propres, ajoute 2,5 kg à la ceinture. Pas de cardio après.');
  PROG2.mar.soir=S5('Jambes A — quadriceps','Jambes A',75,
   [{n:'Jambes · 60 min',ex:['leg-squat','leg-press','leg-ext','leg-curl','leg-calf']},{n:'Abdos · 10 min',ex:['th-hanging']}],
   [{n:'Jambes · 60 min',ex:['leg-press','ven-lunges','leg-ext','leg-curl','th-calfseat']},{n:'Abdos · 10 min',ex:['th-hanging']}],
   'Jour des quadriceps : profondeur complète au squat, repos 3 min. 2 séries de montée en charge avant la première série lourde. Bois et mange bien avant, c\'est la séance la plus coûteuse de la semaine.');
- PROG2.mer.soir=S5('Dos / Biceps — lourd','Pull lourd',80,
-  [{n:'Dos · 45 min',ex:['pull-pullup','pull-rowbar','pull-rowcable','pull-pulldown']},{n:'Arrière d\'épaule · 8 min',ex:['sh-birds']},{n:'Biceps · 18 min',ex:['pull-curlbar','pull-curlinc']}],
-  [{n:'Dos · 45 min',ex:['back-pulldown','back-tbar','back-dbrow','back-pullover']},{n:'Arrière d\'épaule · 8 min',ex:['pull-face']},{n:'Biceps · 18 min',ex:['back-curlham','back-curlcable']}],
-  'Tire avec les coudes, serre les omoplates en fin de mouvement, descente lente. Biceps en fin de séance, sans élan.');
- PROG2.jeu.soir=S5('Épaules / Bras + rappel pecs & dos','Épaules + bras',75,
-  [{n:'Épaules · 25 min',ex:['sh-dbpress','sh-latcable','pull-face']},{n:'Rappel pecs / dos · 18 min',ex:['pec-incbar','back-pulldown']},{n:'Bras · 25 min (biset conseillé)',ex:['pull-curlbar','push-tri','back-curlham','pec-rope']}],
-  [{n:'Épaules · 25 min',ex:['sh-arnold','push-lateral','sh-birds']},{n:'Rappel pecs / dos · 18 min',ex:['pec-deck','pull-rowcable']},{n:'Bras · 25 min (biset conseillé)',ex:['back-curlcable','pec-skull','pull-curlinc','push-tri']}],
-  'Séance de volume : séries propres, 1–2 reps en réserve, repos 90 s. Les bras en biset (curl puis triceps sans pause) : bouton « Enchaîner avec le suivant ». 2e passage de la semaine pour pecs, dos et épaules.');
+ PROG2.mer.soir=S5('Dos / Biceps — lourd','Pull lourd',82,
+  [{n:'Tractions lestées · 15 min',ex:['pull-pullup']},{n:'Dos · 32 min',ex:['pull-rowbar','pull-rowcable','pull-pulldown']},{n:'Arrière d\'épaule · 8 min',ex:['sh-birds']},{n:'Biceps · 18 min',ex:['pull-curlbar','pull-curlinc']}],
+  [{n:'Tractions lestées · 15 min',ex:['pull-pullup']},{n:'Dos · 32 min',ex:['back-tbar','back-dbrow','back-pullover']},{n:'Arrière d\'épaule · 8 min',ex:['pull-face']},{n:'Biceps · 18 min',ex:['back-curlham','back-curlcable']}],
+  'Tractions en premier, à froid mais après échauffement : c\'est là que tu es le plus fort pour les charger. 0 kg = poids de corps ; dès que tu tiens 10 reps, mets 2,5 puis 5 kg à la ceinture (ou un haltère entre les pieds). Ensuite tire avec les coudes, omoplates serrées, descente lente. Biceps en fin de séance, sans élan.');
+ PROG2.jeu.soir=S5('Épaules / Bras + poids du corps lesté','Épaules + bras',82,
+  [{n:'Épaules · 25 min',ex:['sh-dbpress','sh-latcable','pull-face']},{n:'Poids du corps lesté · 20 min',ex:['jr-pullup','jr-dips']},{n:'Bras · 25 min (biset conseillé)',ex:['pull-curlbar','push-tri','back-curlham','pec-rope']}],
+  [{n:'Épaules · 25 min',ex:['sh-arnold','push-lateral','sh-birds']},{n:'Poids du corps lesté · 20 min',ex:['jr-pullup','jr-dips']},{n:'Bras · 25 min (biset conseillé)',ex:['back-curlcable','pec-skull','pull-curlinc','push-tri']}],
+  'Séance de volume : séries propres, 1–2 reps en réserve, repos 90 s. Tractions et dips en alternance (une série de chaque, 2 min de repos entre les tours) : c\'est le 2e passage de la semaine sur le dos, les pecs et les triceps, avec moins de charge que lundi et mercredi. Les bras en biset : bouton « Enchaîner avec le suivant ».');
  PROG2.jeu.title=undefined;
  PROG2.lun.short='Pecs + épaules';PROG2.mar.short='Jambes A';PROG2.mer.short='Dos + biceps';PROG2.jeu.short='Épaules + bras';
 
@@ -39,7 +39,7 @@
  const mk=(t,s,min,diff,note,b)=>({soir:{title:t,short:s,dur:min+' min',min:min,A:b.map(x=>({n:x[0],ex:x[1]})),note:note},short:s,diff:diff,title:undefined,note:undefined,rest:undefined,suggest:undefined,optional:undefined,run:undefined,load:undefined});
  function CDX(){return['Retour au calme',['gx-cd']];}
  const T={
-  'gx-wk-up':mk('Haut du corps — bras, épaules, abdos','Haut du corps',60,'bleue','Vendredi matin avant la moto : aucun exercice de jambes. Bras en superset, épaules à 1–2 reps de la fin, pas d\'échec pour garder du grip.',[['Échauffement · 8 min',['gx-wu']],['Bras · 20 min (superset)',['pull-curlbar','pec-skull','back-curlham','pec-rope']],['Épaules · 15 min',['push-lateral','sh-birds','pull-face']],['Abdos · 10 min',['th-hanging','pull-plank']],CDX()]),
+  'gx-wk-up':mk('Haut du corps — bras, épaules, abdos','Haut du corps',60,'bleue','Vendredi matin avant la moto : aucun exercice de jambes. Bras en superset, épaules à 1–2 reps de la fin, pas d\'échec pour garder du grip.',[['Échauffement · 8 min',['gx-wu']],['Poids du corps lesté · 15 min',['jr-pullup','jr-dips']],['Bras · 18 min (superset)',['pull-curlbar','pec-skull','back-curlham']],['Épaules · 12 min',['push-lateral','sh-birds']],['Abdos · 8 min',['th-hanging','pull-plank']],CDX()]),
   'gx-wk-full':mk('Full body rapide','Full body',60,'bleue','Pour rattraper une séance manquée : une séance complète mais courte, charges modérées, 1–2 reps en réserve.',[['Échauffement · 8 min',['gx-wu']],['Force · 45 min',['leg-press','pec-dbpress','pull-pulldown','sh-dbpress','pull-curlbar','push-tri']],CDX()]),
   'gx-wk-run':mk('Course facile + gainage','Course + gainage',55,'verte','2e course de la semaine (optionnelle) : allure où tu peux parler, 45 min. À éviter la veille d\'une séance de jambes.',[['Course · 45 min',['wk-run']],['Gainage · 10 min',['pull-plank','th-hanging']]])
  };
