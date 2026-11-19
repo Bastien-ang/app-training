@@ -88,13 +88,11 @@
    +'<div class="row wrap" style="margin-top:10px"><button class="btn sm" data-a="nav" data-v="repas">Voir les options</button><button class="btn ghost sm" data-a="nav" data-v="nutri">Mon bilan</button></div></div>';
   const k='<div class="sec"><h2 class="d">Cette semaine</h2></div>';
   return h.indexOf(k)>-1?h.replace(k,card+k):h+card;};
- const _vd=VIEWS.day;
- VIEWS.day=function(){const h=_vd(),d=R.d||today(),P=progOf(d);
-  if(!P||!P.soir||d!==today())return h;
+ window.hxPreCard=function(d){const P=progOf(d);if(!P||!P.soir||d!==today())return '';
   const s=SLOTS.filter(x=>x.id==='pre')[0],o=s.o[chosen(d,s)];
-  return '<div class="card acc" style="--acc:var(--moss)"><div class="rowb"><b>Avant la séance</b><span class="m sub">'+o.k+' kcal · P '+o.p+'</span></div>'
+  return '<div class="card acc premeal" style="--acc:var(--moss)"><div class="rowb"><b>Avant la séance</b><span class="m sub">'+o.k+' kcal · P '+o.p+'</span></div>'
    +'<div class="sub" style="margin:6px 0"><b>'+esc(o.t)+'</b> — '+esc(o.l.join(' · '))+'</div>'
-   +'<div class="row wrap"><button class="btn ghost sm" data-a="nav" data-v="repas">Changer d\'option</button></div></div>'+h;};
+   +'<div class="row wrap"><button class="btn ghost sm" data-a="nav" data-v="repas">Changer d\'option</button></div></div>';};
  const _vn=VIEWS.nutri;
  VIEWS.nutri=function(){return _vn()+'<div class="card"><h3 class="d">Mes repas</h3><div class="sub" style="margin-bottom:8px">Choisis tes options du jour et ajoute-les en un geste.</div><button class="btn sm" data-a="nav" data-v="repas">Ouvrir les repas et la liste de courses</button></div>';};
 })();
