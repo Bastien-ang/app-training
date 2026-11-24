@@ -25,11 +25,14 @@
   return h+jourHTML();};
 
  function palCard(tot,tgt){const p=pal(),wt=(typeof weightTrend==='function')?weightTrend():null;
-  let c='Pèse-toi le matin : si la moyenne sur 7 jours ne bouge pas pendant 2 semaines, monte d\'un palier.';
-  if(wt&&wt.rate!==null){const r=wt.rate;
+  const goal=window.hxGoalKg||80;
+  let c='Pèse-toi chaque matin : l\'objectif est une prise lente, 0,15 à 0,3 kg par semaine. Plus vite, c\'est du gras.';
+  if(wt&&wt.rate!==null){const r=wt.rate,kg=wt.a1!==null?wt.a1:(wt.last&&wt.last.kg);
+   const reste=(kg?Math.max(0,goal-kg):null);
    c = r<0.1 ? 'Ton poids stagne ('+(r>=0?'+':'')+r.toFixed(2)+' kg/sem) : monte d\'un palier.'
-     : r>0.6 ? 'Tu prends vite (+'+r.toFixed(2)+' kg/sem) : redescends d\'un palier.'
-     : 'Tu prends '+(r>=0?'+':'')+r.toFixed(2)+' kg/sem, c\'est le bon rythme.';}
+     : r>0.35 ? 'Tu prends vite (+'+r.toFixed(2)+' kg/sem). Pour rester sec, redescends d\'un palier : au-delà de 0,3 kg/sem, le surplus part en gras.'
+     : 'Tu prends '+(r>=0?'+':'')+r.toFixed(2)+' kg/sem : c\'est exactement le rythme d\'une prise propre.';
+   if(kg)c+=' Tu es à '+kg.toFixed(1)+' kg'+(reste>0?', il reste '+reste.toFixed(1)+' kg jusqu\'à '+goal+' kg (environ '+Math.ceil(reste/0.22)+' semaines à ce rythme).':' — objectif '+goal+' kg atteint, passe en entretien.');}
   return '<div class="card"><div class="rowb"><div><b>Palier '+p+'</b> <span class="sub">objectif '+tgt+' kcal</span></div>'
    +'<div class="row" style="gap:6px"><button class="btn ghost sm" data-a="palSet" data-n="-1"'+(p<=1?' disabled':'')+'>−</button><button class="btn ghost sm" data-a="palSet" data-n="1"'+(p>=4?' disabled':'')+'>+</button></div></div>'
    +'<div class="palbar">'+[1,2,3,4].map(i=>'<i class="'+(i<=p?'on':'')+'"></i>').join('')+'</div>'
