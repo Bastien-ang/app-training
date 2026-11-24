@@ -51,19 +51,18 @@
  /* ---------- intégration dans les séances ---------- */
  const S=(k,fn)=>{const s=PROG2[k].soir;fn(s);s.dur=Math.floor(s.min/60)+'h'+String(s.min%60).padStart(2,'0');};
  /* mardi : explosivité en début de séance, quand le système nerveux est frais */
- S('mar',s=>{s.title='Jambes A — quadriceps + explosivité ski';s.short='Jambes A';s.min=78;
+ S('mar',s=>{s.title='Jambes A — quadriceps';s.short='Jambes A';s.min=72;
   /* les ischios sont déjà servis le dimanche : on libère de la place pour les sauts */
   [s.A,s.B].forEach(V=>V.forEach(b=>{b.ex=b.ex.filter(x=>x!=='leg-curl');}));
-  s.A.unshift({n:'Explosivité ski · 12 min',ex:['ski-box','ski-skater']});
-  s.B.unshift({n:'Explosivité ski · 12 min',ex:['ski-box','ski-skater']});
-  s.note='Les sauts passent en premier, avant le squat : système nerveux frais, qualité maximale, et ça « réveille » les jambes pour la force qui suit. 4 × 3–5 sauts, 2 min de repos, zéro fatigue recherchée. Ensuite jour des quadriceps : profondeur complète, repos 3 min. Si tu skies le week-end suivant, c\'est la séance à ne pas rater.';});
+
+  s.note='Jour des quadriceps, muscu pure : profondeur complète au squat, 2 séries de montée en charge avant la première série lourde, repos 3 min. Les sauts et l\'explosivité sont regroupés dans la séance Hyrox du vendredi, pour garder cette séance-là 100 % hypertrophie.';});
  /* dimanche : contrôle de l'atterrissage et gainage anti-rotation */
- S('dim',s=>{s.title='Jambes B — ischios / fessiers + contrôle ski';s.short='Jambes B';s.min=84;
-  s.A.unshift({n:'Atterrissage & contrôle · 14 min',ex:['ski-drop','ski-step']});
-  s.B.unshift({n:'Atterrissage & contrôle · 14 min',ex:['ski-drop','ski-step']});
+ S('dim',s=>{s.title='Jambes B — ischios / fessiers';s.short='Jambes B';s.min=80;
+  s.A.push({n:'Contrôle unilatéral · 10 min',ex:['ski-step']});
+  s.B.push({n:'Contrôle unilatéral · 10 min',ex:['ski-step']});
   s.A.push({n:'Gainage ski · 10 min',ex:['ski-pallof','ski-copen']});
   s.B.push({n:'Gainage ski · 10 min',ex:['ski-pallof','ski-carry']});
-  s.note='Deuxième séance de jambes : arrière des cuisses, fessiers, puis le travail qui protège les genoux en ski — réceptions amorties et descentes lentes sur une jambe. On finit par l\'anti-rotation, le gainage qui sert vraiment en freeride. Si tu as skié ou roulé toute la journée, enlève les réceptions et garde le reste.';});
+  s.note='Deuxième séance de jambes : arrière des cuisses et fessiers, puis des step-downs lents (aucun impact, que du contrôle excentrique) et le gainage anti-rotation. Pas de sauts ici : tout l\'explosif est le vendredi. Si tu as skié ou roulé toute la journée, enlève le contrôle unilatéral et garde le reste.';});
 
  /* ---------- séance dédiée, en bonus le week-end ---------- */
  const mk=(t,s2,min,diff,note,b)=>({soir:{title:t,short:s2,dur:min+' min',min:min,A:b.map(x=>({n:x[0],ex:x[1]})),note:note},short:s2,diff:diff,title:undefined,note:undefined,rest:undefined,suggest:undefined,optional:undefined,run:undefined,load:undefined});

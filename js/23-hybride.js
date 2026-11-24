@@ -20,6 +20,7 @@
  ALT['hx-erg']=[['Moteur — 20 min rameur continu',0,'mètres'],['Moteur — 4 × (vélo 1 min + SkiErg 250 m)',0,'temps total']];
  ALT['hx-carry']=[['Suitcase carry — 4 × 40 m par côté',0,'kg'],['Sandbag carry — 4 × 40 m',0,'kg']];
  ALT['hx-wall']=[['Thrusters haltères — 4 × 12',0,'kg/haltère'],['Goblet squat rapide — 4 × 15',0,'kg']];
+ ALT['hx-erg'].push(['SkiErg — 6 × 250 m',0,'temps moyen']);
  Object.assign(PAT_DEFAULT,{'hx-erg':'rower','hx-carry':'carry','hx-wall':'wallball','hx-burp':'burpee','hx-sled':'sledpush'});
 
  TIPS.unshift(
@@ -34,17 +35,16 @@
    'Charge modérée et déplacement continu : le sled est là pour l\'endurance de jambes, pas pour un record de force.']]);
 
  /* ---------- mercredi : 10 min de moteur en fin de séance ---------- */
- {const s=PROG2.mer.soir;s.min=88;s.dur='1h28';
+ {const s=PROG2.mer.soir;
   [s.A,s.B].forEach(V=>V.forEach(b=>{if(/^Biceps/.test(b.n))b.n='Biceps · 14 min';}));
-  s.A.push({n:'Moteur · 10 min',ex:['eng-ski']});s.B.push({n:'Moteur · 10 min',ex:['eng-ski']});
-  s.note=s.note+' On finit par 10 min d\'ergomètre : c\'est le seul cardio dur de la semaine en salle, il tombe un jour où les jambes ne travaillent pas.';}
+  s.min=78;s.dur='1h18';}
 
  /* ---------- vendredi : séance Hyrox courte, deux versions ---------- */
- {const min=42;
-  PROG2.ven.soir={title:'Hyrox court — optionnel',short:'Hyrox court',dur:'0h42',min:min,
+ {const min=52;
+  PROG2.ven.soir={title:'Hyrox court — optionnel',short:'Hyrox court',dur:'0h52',min:52,
    A:[{n:'Échauffement · 6 min',ex:['gx-wu']},{n:'Moteur · 20 min',ex:['hx-erg']},{n:'Port de charge · 12 min',ex:['hx-carry','ski-pallof']},{n:'Retour au calme',ex:['gx-cd']}],
-   B:[{n:'Échauffement · 6 min',ex:['gx-wu']},{n:'Moteur · 16 min',ex:['hx-erg']},{n:'Stations · 20 min',ex:['hx-sled','hx-wall','hx-burp','hx-carry']},{n:'Retour au calme',ex:['gx-cd']}],
-   note:'Séance optionnelle du vendredi matin, c\'est elle qui te garde athlétique. Variante A (ergomètres et port de charge) si tu roules en moto l\'après-midi : les jambes restent fraîches. Variante B (version complète avec sled, wall balls et burpees) les vendredis sans moto. Si tu es fatigué de la semaine, fais juste les 20 min de moteur et rentre.'};
+   B:[{n:'Échauffement · 6 min',ex:['gx-wu']},{n:'Explosivité · 10 min',ex:['ski-box','ski-skater']},{n:'Moteur · 16 min',ex:['hx-erg']},{n:'Stations · 18 min',ex:['hx-sled','hx-wall','hx-carry']},{n:'Retour au calme',ex:['gx-cd']}],
+   note:'Séance optionnelle du vendredi matin : c\'est maintenant le seul endroit où tu fais du cardio dur et des sauts, le reste de la semaine est de la muscu pure. Variante A (ergomètres et port de charge, sans sauts) si tu roules en moto l\'après-midi. Variante B (box jumps, sled, wall balls) les vendredis sans moto. Si tu es fatigué de la semaine, fais juste les 20 min de moteur et rentre.'};
   PROG2.ven.diff='bleue';PROG2.ven.short='Hyrox court';
   PROG2.ven.title=undefined;
   PROG2.ven.note='Séance courte et optionnelle le matin. Moto l\'après-midi : prends la variante A, sans sled ni fentes.';}

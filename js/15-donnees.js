@@ -1,6 +1,6 @@
 /* ===================== DONNÉES : protection à chaque mise à jour + synchro en ligne (Gist GitHub privé) ===================== */
 (function(){
- const APPV='2026-11-24b';              // change à chaque mise à jour de l'app -> copie de sécurité automatique
+ const APPV='2026-11-24c';              // change à chaque mise à jour de l'app -> copie de sécurité automatique
  const BK='hx_bak', CL='hx_cloud', FILE='training-data.json', DESC='training-app-data';
  const SEC=['logs','acts','ready','nutri','skip'];
  const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
